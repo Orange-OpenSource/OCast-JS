@@ -16,7 +16,7 @@ deploy:
     skip_cleanup: true
     github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
   - provider: npm
-    email: "olivier.teissere@orange.com"
+    email: "sebast.durand@orange.com"
     api_key: $NPM_TOKEN
     on:
       tags: true
