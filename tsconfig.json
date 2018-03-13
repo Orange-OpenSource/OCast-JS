@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "experimentalDecorators": true,
+    "inlineSources": true,
+    "module": "commonjs",
+    "noImplicitAny": false,
+    "moduleResolution": "node",
+    "outDir": "./dist",
+    "rootDir": ".",
+    "sourceMap": true,
+    "types": [
+      "node",
+      "mocha",
+      "chai",
+      "websocket"
+    ],
+    "target": "es6"
+  },
+  "include": [
+    "ocast.ts",
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+
+
+}

@@ -1,0 +1,22 @@
+language: node_js
+node_js:
+  - "8.6"
+sudo: false
+cache:
+  directories:
+    - node_modules
+install:
+  - npm install
+script:
+  - npm run doc
+  - npm test
+deploy:
+  - provider: pages
+    local_dir: public
+    skip_cleanup: true
+    github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
+  - provider: npm
+    email: "olivier.teissere@orange.com"
+    api_key: $NPM_TOKEN
+    on:
+      tags: true
