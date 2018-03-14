@@ -1,6 +1,6 @@
 # OCast
 [![npm version](https://badge.fury.io/js/ocast-sdk.svg)](http://badge.fury.io/js/ocast-sdk)
-[![node](https://img.shields.io/node/v/ocast-sdk-iconify.svg)](https://www.npmjs.com/package/ocast-sdk-iconify)
+[![node](https://img.shields.io/node/v/ocast-sdk-iconify.svg)](https://www.npmjs.com/package/ocast-sdk)
 [![Build Status](https://travis-ci.org/Orange-OpenSource/OCast-JS.svg?branch=master)](https://travis-ci.org/Orange-OpenSource/OCast-JS)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
 
