@@ -1,6 +1,6 @@
 {
   "name": "ocast-sdk",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "engines": {
     "node": ">=8.6.0"
   },
@@ -9,8 +9,7 @@
   "jsnext:main": "dist/ocast.mjs",
   "scripts": {
     "dev": "rollup -c -w",
-    "prepublish": "tslint 'src/**/*.ts'",
-    "prepare": "rollup -c rollup.config.js --environment BUILD:production && rollup -c rollup.config.es5.js --environment BUILD:production",
+    "prepare": "tslint 'src/**/*.ts' && rollup -c rollup.config.js --environment BUILD:production && rollup -c rollup.config.es5.js --environment BUILD:production",
     "build": "rollup -c rollup.config.js --environment BUILD:production && rollup -c rollup.config.es5.js --environment BUILD:production",
     "test": "nyc mocha --require ts-node/register",
     "doc": "typedoc --out public --exclude ./test --exclude ./node_modules ./src"
