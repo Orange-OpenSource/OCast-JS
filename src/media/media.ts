@@ -109,13 +109,13 @@ export abstract class Media {
 
     public stop(): EnumError {
         this.clear();
-        this.updateStatus(EnumMediaStatus.STOPPED);
+        this.updateStatus(EnumMediaStatus.IDLE);
         return EnumError.OK;
     }
 
     public abort(): EnumError {
         this.clear();
-        this.updateStatus(EnumMediaStatus.CANCELLED);
+        this.updateStatus(EnumMediaStatus.IDLE);
         return EnumError.OK;
     }
 
@@ -203,8 +203,8 @@ export abstract class Media {
         }
 
         // Manage Automatic Transition
-        if ((this.mediaElement.status === EnumMediaStatus.STOPPED) ||
-            (this.mediaElement.status === EnumMediaStatus.CANCELLED)) {
+        if ((this.mediaElement.status === EnumMediaStatus.IDLE) ||
+            (this.mediaElement.status === EnumMediaStatus.ERROR)) {
             this.mediaElement.status = EnumMediaStatus.IDLE;
             this.mediaChannel.onUpdateStatus(this.getPlaybackStatus());
         }

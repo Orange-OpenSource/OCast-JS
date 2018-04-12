@@ -162,9 +162,8 @@ export class VideoMedia extends Media {
      */
     protected getMediaEvents() {
         return {
-            // TODO: Deal with the state ended ( IDLE ???)
-            abort: EnumMediaStatus.CANCELLED,
-            ended: EnumMediaStatus.STOPPED,
+            abort: EnumMediaStatus.IDLE,
+            ended: EnumMediaStatus.IDLE,
             error: EnumMediaStatus.ERROR,
             loadstart: EnumMediaStatus.BUFFERING,
             pause: EnumMediaStatus.PAUSED,

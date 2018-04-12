@@ -186,7 +186,7 @@ describe("MediaChannel", () => {
             } );
             return testPromise.then((result) => {
                 let expected =
-                expect(result).to.equal(getExpectedStatus("paused", EnumError.OK));
+                expect(result).to.equal(getExpectedStatus(3, EnumError.OK));
             });
         });
 
