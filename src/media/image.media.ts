@@ -18,6 +18,9 @@ import {ImagePlaybackStatus} from "../media/image.playback.status";
 import {PlaybackStatus} from "../protocol/playback.status";
 import {EnumMediaStatus} from "../type/enum.media.status";
 import {Media} from "./media";
+import { Metadata } from "../protocol/metadata";
+import { EnumMedia } from "../type/enum.media";
+import { EnumTransferMode } from "../type/enum.transfermode";
 
 /**
  * Media Controller for Images
@@ -33,6 +36,23 @@ export class ImageMedia extends Media {
         return new ImagePlaybackStatus(this.mediaElement.status) as PlaybackStatus;
     }
 
+        /** set metadata
+     * @param title
+     * @param subtitle
+     * @param logo
+     * @param mediaType
+     * @param transferMode
+     * @param subtitleTracks
+     * @param audioTracks
+     */
+    public setMetadata(title: string, subtitle: string, logo: string, mediaType: EnumMedia, transferMode: EnumTransferMode) {
+        // TODO: Adapt metadata for Images ?
+        this.metadata = new Metadata(title, subtitle, logo, mediaType, transferMode);
+    }
+
+    public getMedatadata(): Metadata {
+        return this.metadata;
+    }
     /**
      * Set the source of the stream
      * @param {string} src - url of the stream
@@ -52,7 +72,7 @@ export class ImageMedia extends Media {
     protected getMediaEvents(): any {
         return {
             ended: EnumMediaStatus.BUFFERING,
-            error: EnumMediaStatus.ERROR,
+            error: EnumMediaStatus.UNKNOWN,
             load: EnumMediaStatus.PLAYING,
         };
     }

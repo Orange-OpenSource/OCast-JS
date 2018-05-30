@@ -64,7 +64,7 @@ export class MediaChannel extends Channel {
     public addVideoMediaManager(types: EnumMedia[], mediaElement: any) {
         let media = new VideoMedia(mediaElement, this);
         for (const key in types) {
-            if (types.hasOwnProperty(key)) {
+            if (types.hasOwnProperty(key)) { //TO FIX : always true
                 this.medias[types[key]] = media;
             }
         }
@@ -73,7 +73,7 @@ export class MediaChannel extends Channel {
     public addImageMediaManager(types: EnumMedia[], mediaElement: any) {
         let media = new ImageMedia(mediaElement, this);
         for (const key in types) {
-            if (types.hasOwnProperty(key)) {
+            if (types.hasOwnProperty(key)) { //TO FIX : always true
                 this.medias[types[key]] = media;
             }
         }
@@ -155,6 +155,7 @@ export class MediaChannel extends Channel {
      * @param {EnumTransferMode} transferMode - Type of Stream
      * @param {boolean} autoplay - Boolean to play stream automaticly
      * @param {number} frequency - Status update Frequency
+     * 
      * @param options - Options
      * @returns {EnumError}
      */
