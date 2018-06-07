@@ -19,11 +19,11 @@ import {Metadata} from "../protocol/metadata";
 import {PlaybackStatus} from "../protocol/playback.status";
 import {Track} from "../protocol/track";
 import {EnumError} from "../type/enum.error";
-import {EnumMedia} from "../type/enum.media";
 import {EnumMediaStatus} from "../type/enum.media.status";
 import {EnumTrack} from "../type/enum.track";
 import {EnumTransferMode} from "../type/enum.transfermode";
 import {Logger} from "../util/logger";
+import { EnumMedia } from "../type/enum.media";
 
 const Log: Logger = Logger.getInstance();
 
@@ -34,6 +34,7 @@ export abstract class Media {
     public updateFrequency: number;
     public metadata: Metadata;
     protected statusHandler: any;
+    protected metadataHandler: any;
     private lastUpdate: number;
 
     /**
@@ -44,7 +45,9 @@ export abstract class Media {
     constructor(public mediaElement: any, public mediaChannel: MediaChannel) {
         this.mediaElement.status = EnumMediaStatus.IDLE;
         this.lastUpdate = 0;
+        // bind media listeners on onUpdateStatus
         this.statusHandler = this.onUpdateStatus.bind(this);
+        this.metadataHandler = this.onUpdateMetadata.bind(this);
         this.metadata = null;
         this.addListeners();
     }
@@ -57,19 +60,8 @@ export abstract class Media {
         return (this.mediaElement) ? this.mediaElement.status as EnumMediaStatus : null;
     }
 
-    /** set metadata
-     * @param title
-     * @param subtitle
-     * @param logo
-     * @param mediaType
-     * @param transferMode
-     * @param subtitleTracks
-     * @param audioTracks
-     */
-    public setMetadata(title: string, subtitle: string, logo: string, mediaType: EnumMedia,
-                       transferMode: EnumTransferMode) {
-        this.metadata = new Metadata(title, subtitle, logo, mediaType, transferMode);
-    }
+
+
 
     /**
      * Set the source of the stream
@@ -90,6 +82,17 @@ export abstract class Media {
      * @returns {PlaybackStatus}
      */
     public abstract getPlaybackStatus(): PlaybackStatus; // must be implemented in derived class
+    
+    /**
+     *
+     * @returns {Metadata}
+     */
+    public abstract setMetadata(title: string, subtitle: string, logo: string, mediaType: EnumMedia, transferMode: EnumTransferMode); // must be implemented in derived class
+   /**
+     * return Metadatas
+     * @returns {Metadata}
+     */
+    public abstract getMedatadata(): Metadata;
 
     public seek(position: number): EnumError {
         return EnumError.NO_IMPLEMENTATION;
@@ -109,13 +112,13 @@ export abstract class Media {
 
     public stop(): EnumError {
         this.clear();
-        this.updateStatus(EnumMediaStatus.STOPPED);
+        this.updateStatus(EnumMediaStatus.IDLE);
         return EnumError.OK;
     }
 
     public abort(): EnumError {
         this.clear();
-        this.updateStatus(EnumMediaStatus.CANCELLED);
+        this.updateStatus(EnumMediaStatus.IDLE);
         return EnumError.OK;
     }
 
@@ -134,13 +137,7 @@ export abstract class Media {
     public setTrack(type: EnumTrack, trackId: string, enabled: boolean): EnumError {
         return EnumError.NO_IMPLEMENTATION;
     }
-    /**
-     * return Metadatas
-     * @returns {Metadata}
-     */
-    public getMedatadata(): Metadata {
-        return this.metadata;
-    }
+ 
 
     protected abstract getMediaEvents();
 
@@ -149,6 +146,7 @@ export abstract class Media {
      * @private
      */
     protected addListeners(): void {
+        //status
         const events: any = this.getMediaEvents();
         for (const event in events) {
             if (events.hasOwnProperty(event)) {
@@ -156,6 +154,8 @@ export abstract class Media {
                 this.mediaElement.addEventListener(event, this.statusHandler);
             }
         }
+        //metadata
+        this.mediaElement.addEventListener("loadedmetadata", this.metadataHandler);
     }
 
     /**
@@ -181,7 +181,7 @@ export abstract class Media {
     private onUpdateStatus(event) {
         const mapping = this.getMediaEvents();
         this.updateStatus(mapping[event.type]);
-        this.onUpdateMetadata(event);
+        //this.onUpdateMetadata(event);
     }
 
     private updateStatus(status) {
@@ -203,8 +203,8 @@ export abstract class Media {
         }
 
         // Manage Automatic Transition
-        if ((this.mediaElement.status === EnumMediaStatus.STOPPED) ||
-            (this.mediaElement.status === EnumMediaStatus.CANCELLED)) {
+        if ((this.mediaElement.status === EnumMediaStatus.IDLE) ||
+            (this.mediaElement.status === EnumMediaStatus.UNKNOWN)) {
             this.mediaElement.status = EnumMediaStatus.IDLE;
             this.mediaChannel.onUpdateStatus(this.getPlaybackStatus());
         }

@@ -23,6 +23,8 @@ import {EnumTransferMode} from "../type/enum.transfermode";
 import {Logger} from "../util/logger";
 import {Media} from "./media";
 import {VideoPlaybackStatus} from "./video.playback.status";
+import { Metadata } from "../protocol/metadata";
+import {EnumMedia} from "../type/enum.media";
 
 const TAG: string = " [VideoMedia] ";
 const Log: Logger = Logger.getInstance();
@@ -41,6 +43,24 @@ export class VideoMedia extends Media {
             this.mediaElement.muted,
             this.mediaElement.currentTime,
             this.mediaElement.duration) as PlaybackStatus;
+    }
+
+    /** set metadata
+     * @param title
+     * @param subtitle
+     * @param logo
+     * @param mediaType
+     * @param transferMode
+     * @param subtitleTracks
+     * @param audioTracks
+     */
+    public setMetadata(title: string, subtitle: string, logo: string, mediaType: EnumMedia, transferMode: EnumTransferMode) {
+        this.metadata = new Metadata(title, subtitle, logo, mediaType, transferMode);
+    }
+
+    public getMedatadata(): Metadata {
+        this.updateTracks();
+        return this.metadata;
     }
 
     public setTrack(type: EnumTrack, trackId: string, enabled: boolean): EnumError {
@@ -162,10 +182,9 @@ export class VideoMedia extends Media {
      */
     protected getMediaEvents() {
         return {
-            // TODO: Deal with the state ended ( IDLE ???)
-            abort: EnumMediaStatus.CANCELLED,
-            ended: EnumMediaStatus.STOPPED,
-            error: EnumMediaStatus.ERROR,
+            abort: EnumMediaStatus.IDLE,
+            ended: EnumMediaStatus.IDLE,
+            error: EnumMediaStatus.UNKNOWN,
             loadstart: EnumMediaStatus.BUFFERING,
             pause: EnumMediaStatus.PAUSED,
             playing: EnumMediaStatus.PLAYING,
@@ -189,47 +208,57 @@ export class VideoMedia extends Media {
             return;
         }
         let signature: string = JSON.stringify(this.metadata);
-        // Catch AudioTracks
-        let i = 0;
-        let tracks;
-        tracks = [];
-        // TODO: Refactor this code (redundancy)
-        let audioTracks = this.mediaElement.audioTracks;
-        for (i = 0; i < audioTracks.length; i++ ) {
-            tracks.push(
-                new Track(  EnumTrack.AUDIO,
-                            i.toString(),
-                            audioTracks[i].enabled,
-                            audioTracks[i].language,
-                            audioTracks[i].label));
-        }
-        this.metadata.audioTracks = tracks;
-        // Catch VideoTracks
-        tracks = [];
-        let videoTracks = this.mediaElement.videoTracks;
-        for (i = 0; i < videoTracks.length; i++ ) {
-            tracks.push(
-                new Track(  EnumTrack.VIDEO,
-                    i.toString(),
-                    videoTracks[i].selected,
-                    videoTracks[i].language,
-                    videoTracks[i].label));
-        }
-        this.metadata.videoTracks = tracks;
-        // Catch TextTracks
-        tracks = [];
-        let textTracks = this.mediaElement.textTracks;
-        for (i = 0; i < textTracks.length; i++ ) {
-            tracks.push(
-                new Track(  EnumTrack.TEXT,
-                    i.toString(),
-                    textTracks[i].mode === "showing",
-                    textTracks[i].language,
-                    textTracks[i].label));
-        }
-        this.metadata.textTracks = tracks;
+        this.updateTracks();
         if (JSON.stringify(this.metadata) !==  signature) {
             this.mediaChannel.onUpdateMetadata(this.getMedatadata());
+        }
+    }
+
+    private updateTracks(){
+         // Catch AudioTracks
+         let i = 0;
+         let tracks;
+         tracks = [];
+         // TODO: Refactor this code (redundancy)
+         let audioTracks = this.mediaElement.audioTracks;
+         if(audioTracks){
+            for (i = 0; i < audioTracks.length; i++ ) {
+                tracks.push(
+                    new Track(  EnumTrack.AUDIO,
+                                i.toString(),
+                                audioTracks[i].enabled,
+                                audioTracks[i].language,
+                                audioTracks[i].label));
+            }
+            this.metadata.audioTracks = tracks;
+        }
+         // Catch VideoTracks
+         tracks = [];
+         let videoTracks = this.mediaElement.videoTracks;
+         if(videoTracks){
+            for (i = 0; i < videoTracks.length; i++ ) {
+                tracks.push(
+                    new Track(  EnumTrack.VIDEO,
+                        i.toString(),
+                        videoTracks[i].selected,
+                        videoTracks[i].language,
+                        videoTracks[i].label));
+            }
+            this.metadata.videoTracks = tracks;
+        }
+         // Catch TextTracks
+         tracks = [];
+         let textTracks = this.mediaElement.textTracks;
+         if(textTracks){
+            for (i = 0; i < textTracks.length; i++ ) {
+                tracks.push(
+                    new Track(  EnumTrack.TEXT,
+                        i.toString(),
+                        textTracks[i].mode === "showing",
+                        textTracks[i].language,
+                        textTracks[i].label));
+            }
+            this.metadata.textTracks = tracks;
         }
     }
 }

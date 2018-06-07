@@ -37,7 +37,7 @@ export class WebappChannel extends Channel {
      * @type {{CONNECTION_STATUS: string}}
      */
     protected static EVENTS: any = {
-        CONNECTION_STATUS: "connectionStatus",
+        CONNECTION_STATUS: "connectedStatus",
     };
 
     /**
