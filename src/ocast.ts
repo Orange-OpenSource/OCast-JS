@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {Channel} from "./channel/channel";
-import {MediaChannel} from "./channel/media.channel";
-import {WebappChannel} from "./channel/webapp.channel";
-import {Transport} from "./protocol/transport";
-import {TransportMessage} from "./protocol/transport.message";
-import {EnumError} from "./type/enum.error";
-import {EnumProtocol} from "./type/enum.protocol";
-import {EnumTransport} from "./type/enum.transport";
-import {Logger} from "./util/logger";
+import { Channel } from "./channel/channel";
+import { MediaChannel } from "./channel/media.channel";
+import { WebappChannel } from "./channel/webapp.channel";
+import { Transport } from "./protocol/transport";
+import { TransportMessage } from "./protocol/transport.message";
+import { EnumError } from "./type/enum.error";
+import { EnumProtocol } from "./type/enum.protocol";
+import { EnumTransport } from "./type/enum.transport";
+import { Logger } from "./util/logger";
 
 const TAG: string = " [OCast] ";
 const Log: Logger = Logger.getInstance();
@@ -31,151 +31,155 @@ const Log: Logger = Logger.getInstance();
  * OCast Root Object
  */
 export class OCast {
-    public debug = false;
-    private ws: WebSocket = null;
-    private channels: Channel[] = [];
+  public debug = false;
+  private ws: WebSocket = null;
+  private channels: Channel[] = [];
 
-    /**
-     * OCast Root Object, create default channel 'webapp' and 'media'
-     * @constructor
-     */
-    constructor() {
-        this.setupMediaChannel();
-        this.setupWebappChannel();
-    }
-    /**
-     * Initialize MediaChannel
-     * @private
-     */
-    private setupMediaChannel() {
-        let channel = new MediaChannel();
-        this.channels[channel.name] = channel;
-    }
+  /**
+   * OCast Root Object, create default channel 'webapp' and 'media'
+   * @constructor
+   */
+  constructor() {
+    this.setupMediaChannel();
+    this.setupWebappChannel();
+  }
 
-    /**
-     * Initialize MediaChannel
-     * @private
-     */
-    private setupWebappChannel(): void {
-        let channel: WebappChannel = new WebappChannel();
-        this.channels[channel.name] = channel;
-    }
-    /**
-     * Public function to Start initialization
-     * @public
-     */
-    public start() {
-        Log.info(TAG + "init WebSocket with url : " + EnumProtocol.PROTOCOL + EnumProtocol.HOST + ":" +
-            EnumProtocol.PORT + EnumProtocol.PATH);
-        this.ws = new WebSocket(EnumProtocol.PROTOCOL + EnumProtocol.HOST + ":" + EnumProtocol.PORT +
-            EnumProtocol.PATH);
-        this.ws.onopen = this.onConnected.bind(this);
-        this.ws.onmessage = this.onMessage.bind(this);
-        this.ws.onerror = this.onError.bind(this);
-        this.ws.onclose = this.onClose.bind(this);
-    }
+  /**
+   * Public function to Start initialization
+   * @public
+   */
+  public start() {
+    this.ws = new WebSocket(EnumProtocol.PROTOCOL + EnumProtocol.HOST + ":" + EnumProtocol.PORT + EnumProtocol.PATH);
+    this.ws.onopen = this.onConnected.bind(this);
+    this.ws.onmessage = this.onMessage.bind(this);
+    this.ws.onerror = this.onError.bind(this);
+    this.ws.onclose = this.onClose.bind(this);
+  }
 
-    private onError(error) {
-        Log.info(TAG + "receive error event : ", error);
-    }
+  /**
+   * Create a Custom Channel
+   * @param service
+   * @returns {MediaChannel}
+   * @public
+   */
+  public createChannel(service: string): Channel {
+    // todo: Manage duplicate channel
+    let channel: Channel = new Channel(service);
+    channel.setSocket(this.ws);
+    this.channels[service] = channel;
+    return channel;
+  }
 
-    private onClose(close) {
-        Log.info(TAG + "websocket is closed ");
-    }
+  /**
+   * Return a MediaChannel
+   * @returns {MediaChannel}
+   * @public
+   */
+  public getMediaChannel(): MediaChannel {
+    return this.getChannel(MediaChannel.NAMESPACE) as MediaChannel;
+  }
 
-    /**
-     * Send Connected Event when Connection Opened
-     * @param event
-     */
-    private onConnected(event) {
-        Log.info(TAG + "websocket onConnected event");
-        this.updateSocketChannel();
-    }
+  /**
+   * Return WebappChannel
+   * @returns {WebappChannel}
+   * @public
+   */
+  public getWebappChannel(): WebappChannel {
+    return this.getChannel(WebappChannel.NAMESPACE) as WebappChannel;
+  }
 
-    /**
-     * Set websocket on all channels
-     * @private
-     */
-    private updateSocketChannel(): void {
-        for (let key in this.channels) {
-            if (this.channels.hasOwnProperty(key)) {
-                let channel: Channel = this.channels[key];
-                channel.setSocket(this.ws);
-            }
-        }
-    }
-    /**
-     * Handler to receive messages
-     * @param event
-     * @private
-     */
-    private onMessage(event) {
-        Log.debug(TAG + "receive message : " + event.data);
-        let message: Transport = JSON.parse(event.data);
-        try {
-            this.publish(message);
-        } catch (e) {
-            // todo: Catch a better way internal Errors (with call stack)
-            console.error("Uncaught exception" + e);
-        }
-    }
+  /**
+   * Return Channel
+   * @param {string} service Name
+   * @returns {Channel}
+   * @public
+   */
+  public getChannel(service: string): Channel {
+    return this.channels[service] as Channel;
+  }
+  /**
+   * Initialize MediaChannel
+   * @private
+   */
+  private setupMediaChannel() {
+    let channel = new MediaChannel();
+    this.channels[channel.name] = channel;
+  }
 
-    /**
-     * publish message on internal Bus
-     * @param {Transport} transport - transport Message
-     * @private
-     */
-    private publish(transport: Transport) {
-        if (this.channels.hasOwnProperty(transport.message.service)) {
-            let channel = this.channels[transport.message.service];
-            channel.onMessage(transport);
-        } else {
-            Log.warn("Unknown namespace <<<" + transport.message.service + ">>>");
-            let message = new Transport(transport.dst, transport.src, EnumTransport.REPLY, transport.id,
-                new TransportMessage(transport.message.service, {params: {code: EnumError.INVALID_NAMESPACE}}));
-            this.ws.send(JSON.stringify(message));
-        }
+  /**
+   * Initialize MediaChannel
+   * @private
+   */
+  private setupWebappChannel(): void {
+    let channel: WebappChannel = new WebappChannel();
+    this.channels[channel.name] = channel;
+  }
+  /**
+   * publish message on internal Bus
+   * @param {Transport} transport - transport Message
+   * @private
+   */
+  private publish(transport: Transport) {
+    if (this.channels.hasOwnProperty(transport.message.service)) {
+      let channel = this.channels[transport.message.service];
+      channel.onMessage(transport);
+    } else {
+      Log.warn("Unknown namespace <<<" + transport.message.service + ">>>");
+      let message = new Transport(
+        transport.dst,
+        transport.src,
+        EnumTransport.REPLY,
+        transport.id,
+        new TransportMessage(transport.message.service, {
+          params: { code: EnumError.INVALID_NAMESPACE },
+        }),
+      );
+      this.ws.send(JSON.stringify(message));
     }
+  }
 
-    /**
-     * Create a Custom Channel
-     * @param service
-     * @returns {MediaChannel}
-     * @public
-     */
-    public createChannel(service: string): Channel {
-        // todo: Manage duplicate channel
-        let channel: Channel = new Channel(service);
+  /**
+   * Handler to receive messages
+   * @param event
+   * @private
+   */
+  private onMessage(event) {
+    Log.debug(TAG + "receive message : " + event.data);
+    let message: Transport = JSON.parse(event.data);
+    try {
+      this.publish(message);
+    } catch (e) {
+      // todo: Catch a better way internal Errors (with call stack)
+      console.error("Uncaught exception" + e);
+    }
+  }
+  private onError(error) {
+    Log.info(TAG + "receive error event : ", error);
+  }
+
+  private onClose(close) {
+    Log.info(TAG + "websocket is closed ");
+  }
+
+  /**
+   * Send Connected Event when Connection Opened
+   * @param event
+   */
+  private onConnected(event) {
+    Log.info(TAG + "websocket onConnected event");
+    this.updateSocketChannel();
+  }
+
+  /**
+   * Set websocket on all channels
+   * @private
+   */
+  private updateSocketChannel(): void {
+    for (let key in this.channels) {
+      if (this.channels.hasOwnProperty(key)) {
+        let channel: Channel = this.channels[key];
         channel.setSocket(this.ws);
-        this.channels[service] = channel;
-        return channel;
+      }
     }
-
-    /**
-     * Return a MediaChannel
-     * @returns {MediaChannel}
-     * @public
-     */
-    public getMediaChannel(): MediaChannel {
-        return this.getChannel(MediaChannel.NAMESPACE) as MediaChannel;
-    }
-
-    /**
-     * Return WebappChannel
-     * @returns {WebappChannel}
-     * @public
-     */
-    public getWebappChannel(): WebappChannel {
-        return this.getChannel(WebappChannel.NAMESPACE) as WebappChannel;
-    }
-
-    /**
-     * Return Channel
-     * @param {string} service Name
-     * @returns {Channel}
-     * @public
-     */
-    public getChannel(service: string): Channel {
-        return this.channels[service] as Channel;
-    }
+  }
 }
