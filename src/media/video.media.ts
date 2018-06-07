@@ -221,38 +221,44 @@ export class VideoMedia extends Media {
          tracks = [];
          // TODO: Refactor this code (redundancy)
          let audioTracks = this.mediaElement.audioTracks;
-         for (i = 0; i < audioTracks.length; i++ ) {
-             tracks.push(
-                 new Track(  EnumTrack.AUDIO,
-                             i.toString(),
-                             audioTracks[i].enabled,
-                             audioTracks[i].language,
-                             audioTracks[i].label));
-         }
-         this.metadata.audioTracks = tracks;
+         if(audioTracks){
+            for (i = 0; i < audioTracks.length; i++ ) {
+                tracks.push(
+                    new Track(  EnumTrack.AUDIO,
+                                i.toString(),
+                                audioTracks[i].enabled,
+                                audioTracks[i].language,
+                                audioTracks[i].label));
+            }
+            this.metadata.audioTracks = tracks;
+        }
          // Catch VideoTracks
          tracks = [];
          let videoTracks = this.mediaElement.videoTracks;
-         for (i = 0; i < videoTracks.length; i++ ) {
-             tracks.push(
-                 new Track(  EnumTrack.VIDEO,
-                     i.toString(),
-                     videoTracks[i].selected,
-                     videoTracks[i].language,
-                     videoTracks[i].label));
-         }
-         this.metadata.videoTracks = tracks;
+         if(videoTracks){
+            for (i = 0; i < videoTracks.length; i++ ) {
+                tracks.push(
+                    new Track(  EnumTrack.VIDEO,
+                        i.toString(),
+                        videoTracks[i].selected,
+                        videoTracks[i].language,
+                        videoTracks[i].label));
+            }
+            this.metadata.videoTracks = tracks;
+        }
          // Catch TextTracks
          tracks = [];
          let textTracks = this.mediaElement.textTracks;
-         for (i = 0; i < textTracks.length; i++ ) {
-             tracks.push(
-                 new Track(  EnumTrack.TEXT,
-                     i.toString(),
-                     textTracks[i].mode === "showing",
-                     textTracks[i].language,
-                     textTracks[i].label));
-         }
-         this.metadata.textTracks = tracks;
+         if(textTracks){
+            for (i = 0; i < textTracks.length; i++ ) {
+                tracks.push(
+                    new Track(  EnumTrack.TEXT,
+                        i.toString(),
+                        textTracks[i].mode === "showing",
+                        textTracks[i].language,
+                        textTracks[i].label));
+            }
+            this.metadata.textTracks = tracks;
+        }
     }
 }
