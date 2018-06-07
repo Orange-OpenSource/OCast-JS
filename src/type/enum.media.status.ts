@@ -18,11 +18,9 @@
  * Media Status Enum
  */
 export enum EnumMediaStatus {
-    IDLE = "idle",
-    BUFFERING = "buffering",
-    PLAYING = "playing",
-    PAUSED = "paused",
-    STOPPED =  "stopped",
-    CANCELLED =  "cancelled",
-    ERROR = "error",
+    UNKNOWN = 0,
+    IDLE = 1,
+    PLAYING = 2,
+    PAUSED = 3,
+    BUFFERING = 4,
 }

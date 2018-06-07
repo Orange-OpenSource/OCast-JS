@@ -14,46 +14,77 @@
  * limitations under the License.
  */
 
-import {ImagePlaybackStatus} from "../media/image.playback.status";
-import {PlaybackStatus} from "../protocol/playback.status";
-import {EnumMediaStatus} from "../type/enum.media.status";
-import {Media} from "./media";
+import { ImagePlaybackStatus } from "../media/image.playback.status";
+import { Metadata } from "../protocol/metadata";
+import { PlaybackStatus } from "../protocol/playback.status";
+import { EnumMedia } from "../type/enum.media";
+import { EnumMediaStatus } from "../type/enum.media.status";
+import { EnumTransferMode } from "../type/enum.transfermode";
+import { Media } from "./media";
 
 /**
  * Media Controller for Images
  */
 export class ImageMedia extends Media {
+  /**
+   * Return get playback Status
+   * @returns {PlaybackStatus} - Play back Status
+   */
+  public getPlaybackStatus(): PlaybackStatus {
+    // TODO: Adapt PlaybackStatus for Images ?
+    return new ImagePlaybackStatus(this.mediaElement.status) as PlaybackStatus;
+  }
 
-    /**
-     * Return get playback Status
-     * @returns {PlaybackStatus} - Play back Status
-     */
-    public getPlaybackStatus(): PlaybackStatus {
-        // TODO: Adapt PlaybackStatus for Images ?
-        return new ImagePlaybackStatus(this.mediaElement.status) as PlaybackStatus;
-    }
+  /** set metadata
+   * @param title
+   * @param subtitle
+   * @param logo
+   * @param mediaType
+   * @param transferMode
+   * @param subtitleTracks
+   * @param audioTracks
+   */
+  public setMetadata(
+    title: string,
+    subtitle: string,
+    logo: string,
+    mediaType: EnumMedia,
+    transferMode: EnumTransferMode,
+  ) {
+    // TODO: Adapt metadata for Images ?
+    this.metadata = new Metadata(
+      title,
+      subtitle,
+      logo,
+      mediaType,
+      transferMode,
+    );
+  }
 
-    /**
-     * Set the source of the stream
-     * @param {string} src - url of the stream
-     */
-    public load(src: string) {
-        if (src) {
-            this.mediaElement.src = src;
-        } else {
-            this.mediaElement.src = "";
-        }
+  public getMedatadata(): Metadata {
+    return this.metadata;
+  }
+  /**
+   * Set the source of the stream
+   * @param {string} src - url of the stream
+   */
+  public load(src: string) {
+    if (src) {
+      this.mediaElement.src = src;
+    } else {
+      this.mediaElement.src = "";
     }
-    /**
-     * get Table of Mapping With Internal Status
-     * @returns {{ended: EnumMediaStatus, error: EnumMediaStatus, timeupdate: EnumMediaStatus}}
-     * @protected
-     */
-    protected getMediaEvents(): any {
-        return {
-            ended: EnumMediaStatus.BUFFERING,
-            error: EnumMediaStatus.ERROR,
-            load: EnumMediaStatus.PLAYING,
-        };
-    }
+  }
+  /**
+   * get Table of Mapping With Internal Status
+   * @returns {{ended: EnumMediaStatus, error: EnumMediaStatus, timeupdate: EnumMediaStatus}}
+   * @protected
+   */
+  protected getMediaEvents(): any {
+    return {
+      ended: EnumMediaStatus.BUFFERING,
+      error: EnumMediaStatus.UNKNOWN,
+      load: EnumMediaStatus.PLAYING,
+    };
+  }
 }
