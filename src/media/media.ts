@@ -49,7 +49,6 @@ export abstract class Media {
     this.statusHandler = this.onUpdateStatus.bind(this);
     this.metadataHandler = this.onUpdateMetadata.bind(this);
     this.metadata = null;
-    this.addListeners();
   }
 
   /**

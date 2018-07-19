@@ -70,6 +70,7 @@ export class ImageMedia extends Media {
    */
   public load(src: string) {
     if (src) {
+      this.addListeners();
       this.mediaElement.src = src;
     } else {
       this.mediaElement.src = "";

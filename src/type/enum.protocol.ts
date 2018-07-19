@@ -19,8 +19,8 @@
  */
 export enum EnumProtocol {
     /** test protocol */
-    PROTOCOL = "ws://",
-    PORT = 4434,
+    PROTOCOL = "wss://",
+    PORT = 4433,
     HOST = "localhost",
     PATH = "/ocast",
     OK_STATUS = "OK",

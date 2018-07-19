@@ -13,6 +13,7 @@
  *    See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import "./channel/media.notifier";
 
 export {EnumError} from "./type/enum.error";
 export {EnumMediaStatus} from "./type/enum.media.status";
