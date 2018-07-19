@@ -145,6 +145,10 @@ export class OCast {
    */
   private onMessage(event) {
     Log.debug(TAG + "receive message : " + event.data);
+    if(event.data.type === EnumTransport.REPLY && event.data.status !== "ok"){
+      Log.error(TAG +"receive error message : " + event.data.status);
+      return;
+    }
     let message: Transport = JSON.parse(event.data);
     try {
       this.publish(message);
