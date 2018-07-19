@@ -183,6 +183,7 @@ export class VideoMedia extends Media {
    * @param {string} src - url of the stream
    */
   public load(src: string, autoplay?: boolean) {
+    this.addListeners();
     if (autoplay !== undefined) {
       this.mediaElement.autoplay = autoplay;
     }
