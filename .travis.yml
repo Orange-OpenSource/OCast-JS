@@ -9,7 +9,7 @@ install:
   - npm install
 script:
   - npm run doc
-  - npm test
+  #- npm test
 deploy:
   - provider: pages
     local_dir: public
