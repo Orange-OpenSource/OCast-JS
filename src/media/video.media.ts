@@ -187,6 +187,7 @@ export class VideoMedia extends Media {
       this.mediaElement.autoplay = autoplay;
     }
     if (src) {
+      this.addListeners();
       this.mediaElement.src = src;
     } else {
       this.mediaElement.pause();
@@ -223,11 +224,11 @@ export class VideoMedia extends Media {
   }
   protected onUpdateMetadata(event): void {
     if (!this.mediaElement) {
-      Log.warn("MediaElement is null, ignore event (" + event.type + ")");
+      Log.error("MediaElement is null, ignore event (" + event.type + ")");
       return;
     }
     if (!this.metadata) {
-      Log.warn("Metadata is null !!! ( implementation error )");
+      Log.error("Metadata is null !!! ( implementation error )");
       return;
     }
 
@@ -238,8 +239,7 @@ export class VideoMedia extends Media {
         this.mediaElement.textTracks
       )
     ) {
-      Log.warn("Tracks not implemented !!! ( implementation error )");
-      return;
+      Log.debug("Tracks not implemented !!! ( implementation error )");
     }
     let signature: string = JSON.stringify(this.metadata);
     this.updateTracks();
