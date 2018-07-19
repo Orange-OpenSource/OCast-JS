@@ -69,8 +69,8 @@ export class ImageMedia extends Media {
    * @param {string} src - url of the stream
    */
   public load(src: string) {
-    this.addListeners();
     if (src) {
+      this.addListeners();
       this.mediaElement.src = src;
     } else {
       this.mediaElement.src = "";
