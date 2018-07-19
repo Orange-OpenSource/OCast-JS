@@ -240,7 +240,6 @@ export class VideoMedia extends Media {
       )
     ) {
       Log.warn("Tracks not implemented !!! ( implementation error )");
-      return;
     }
     let signature: string = JSON.stringify(this.metadata);
     this.updateTracks();
