@@ -20,7 +20,10 @@ import {ImagePlayer} from "./mock/image.player";
 const broker = d2r.broker;
 const client = d2r.client;
 
-let ocast: OCast = new OCast();
+let ocast: OCast = new OCast({
+    webSocketPort: 4434,
+    webSocketProtocol: "ws://"
+});
 let dummyVideoPlayer: VideoPlayer = new VideoPlayer();
 let dummyImagePlayer: ImagePlayer = new ImagePlayer();
 let sequenceId: number = 4;

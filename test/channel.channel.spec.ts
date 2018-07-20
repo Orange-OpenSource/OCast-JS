@@ -17,7 +17,10 @@ global.WebSocket = WebSocket;
 const broker = d2r.broker;
 const client = d2r.client;
 
-let ocast: OCast = new OCast();
+let ocast: OCast = new OCast({
+    webSocketPort: 4434,
+    webSocketProtocol: "ws://"
+});
 
 const Log: Logger = Logger.getInstance();
 

@@ -23,6 +23,7 @@ import { EnumError } from "./type/enum.error";
 import { EnumProtocol } from "./type/enum.protocol";
 import { EnumTransport } from "./type/enum.transport";
 import { Logger } from "./util/logger";
+import { IOcastInit } from "./i-ocast-init";
 
 const TAG: string = " [OCast] ";
 const Log: Logger = Logger.getInstance();
@@ -34,14 +35,18 @@ export class OCast {
   public debug = false;
   private ws: WebSocket = null;
   private channels: Channel[] = [];
+  private initParameters: IOcastInit = null;
 
   /**
    * OCast Root Object, create default channel 'webapp' and 'media'
    * @constructor
    */
-  constructor() {
+  constructor(initParameters?: IOcastInit) {
     this.setupMediaChannel();
     this.setupWebappChannel();
+    this.initParameters = initParameters || {};
+    this.initParameters.webSocketProtocol = this.initParameters.webSocketProtocol || EnumProtocol.PROTOCOL;
+    this.initParameters.webSocketPort = this.initParameters.webSocketPort || EnumProtocol.PORT;
   }
 
   /**
@@ -49,7 +54,7 @@ export class OCast {
    * @public
    */
   public start() {
-    this.ws = new WebSocket(EnumProtocol.PROTOCOL + EnumProtocol.HOST + ":" + EnumProtocol.PORT + EnumProtocol.PATH);
+    this.ws = new WebSocket(this.initParameters.webSocketProtocol + EnumProtocol.HOST + ":" + this.initParameters.webSocketPort + EnumProtocol.PATH);
     this.ws.onopen = this.onConnected.bind(this);
     this.ws.onmessage = this.onMessage.bind(this);
     this.ws.onerror = this.onError.bind(this);
