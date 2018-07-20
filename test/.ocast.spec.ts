@@ -21,7 +21,7 @@ const client = d2r.client;
 
 let ocast: OCast = new OCast({
     webSocketPort: 4434,
-    webSocketProtocol: "wss://"
+    webSocketProtocol: "ws://",
 });
 let dummyVideoPlayer: VideoPlayer = new VideoPlayer();
 
