@@ -14,7 +14,7 @@ import util = require("util");
 const expect = chai.expect;
 
 import WebSocket = require("ws");
-global.WebSocket = WebSocket;
+global['WebSocket'] = WebSocket;
 
 const broker = d2r.broker;
 const client = d2r.client;
