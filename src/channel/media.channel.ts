@@ -26,13 +26,17 @@ import {EnumMediaStatus} from "../type/enum.media.status";
 import {EnumTrack} from "../type/enum.track";
 import {EnumTransferMode} from "../type/enum.transfermode";
 import {EnumTransport} from "../type/enum.transport";
-import {FunctionHelper} from "../util/function.helper";
 import {Logger} from "../util/logger";
 import {Channel} from "./channel";
+import {EnumMediaMessage} from "./enum.media.messages";
 import {IMediaNotifier} from "./media.notifier";
 
 const TAG: string = " [MediaChannel] ";
 const Log: Logger = Logger.getInstance();
+
+// Manage annotations to call methods by transport message
+// Store all methods/message type
+const methodsByMessage: { [key: string]: IMethodWithParams } = {};
 
 /**
  * MediaChannel Class dedicated to OCast Protocol
@@ -44,7 +48,6 @@ export class MediaChannel extends Channel {
         METADATA_CHANGED: "metadataChanged",
         PLAYBACK_STATUS: "playbackStatus",
     };
-    private static PREFIX: string = "do";
     private media: Media = null;
     private notifier: IMediaNotifier;
     private medias: Media[] = [];
@@ -83,63 +86,72 @@ export class MediaChannel extends Channel {
      * Implements specific parsing for this channel
      * @param {Transport} transport - Message to send
      */
-    public onMessage(transport: Transport) {
-        const method = MediaChannel.PREFIX + FunctionHelper.capitalizeFirstLetter(transport.message.data.name);
-        const params = transport.message.data.params != null ? transport.message.data.params : {};
-        const methodParams = [];
-
-        // Method to call specific implementation
-        if (typeof this[method] === "function") {
-            const requiredParams = FunctionHelper.getParamNames(this[method]);
-            let validate = true;
-            // Add Options in params ...
-            params.options = transport.message.data.options;
-            params.id = transport.id;
-            params.src = transport.src;
-
-            for (const key in requiredParams) {
-                if (!params.hasOwnProperty(requiredParams[key])) {
-                    Log.error(TAG + "Mandatory parameter is not found <<" + requiredParams[key] + ">>");
-                    validate = false;
-                } else {
-                    methodParams.push(params[requiredParams[key]]);
-                }
-            }
-
-            if (validate) {
-                try {
-                    Log.debug(TAG + "call   " + method + "(" + JSON.stringify(methodParams) + ")");
-                    const returnCode = this[method].apply(this, methodParams);
-                    if (typeof(returnCode) !== "undefined") {
-                        this.sendReply(transport.id, transport.src, {
-                            name: transport.message.data.name,
-                            params: {code: returnCode},
-                        });
-                    }
-                } catch (e) {
-                    Log.error(TAG + "Error while executing " + method + " with error ", e);
-                    if (transport.type === EnumTransport.COMMAND) {
-                        this.sendReply(transport.id, transport.src, {
-                            name: transport.message.data.name,
-                            params: {code: EnumError.UNKNOWN_ERROR},
-                        });
-                    }
-                }
-            } else {
-                Log.error(TAG + "Error while executing " + method + " paramters missing)");
-                if (transport.type === EnumTransport.COMMAND) {
-                    this.sendReply(transport.id, transport.src, {
-                        name: transport.message.data.name,
-                        params: {code: EnumError.PARAMS_MISSING},
-                    });
-                }
-            }
-        } else {
-            Log.error(TAG + "Function '" + method + "' not found");
+    public onMessage(transport: Transport): void {
+        // Check if message is supported
+        if (!methodsByMessage[transport.message.data.name]) {
+            Log.error(TAG + "Message type '" + transport.message.data.name + "' unknown");
             if (transport.type === EnumTransport.COMMAND) {
                 this.sendReply(transport.id, transport.src, {
                     name: transport.message.data.name,
-                    params: {code: EnumError.NO_IMPLEMENTATION},
+                    params: { code: EnumError.NO_IMPLEMENTATION },
+                });
+            }
+            return;
+        }
+
+        // Explode message to call method
+        const methodDescriptor: IMethodWithParams = methodsByMessage[transport.message.data.name];
+        const paramsToCallMethod: any[] = [];
+        const paramsMessage: {} = transport.message.data.params || {};
+        let validate: boolean = true;
+        methodDescriptor.params.forEach((paramType: IParamWithNameAndType) => {
+            switch (paramType.name) {
+                case "id":
+                    paramsToCallMethod.push(transport.id);
+                    break;
+                case "src":
+                    paramsToCallMethod.push(transport.src);
+                    break;
+                case "options":
+                    paramsToCallMethod.push(transport.message.data.options);
+                    break;
+                default:
+                    if (!paramsMessage.hasOwnProperty(paramType.name)) {
+                        Log.error(TAG + "Mandatory parameter is not found <<" + paramType.name + ">>");
+                        validate = false;
+                    } else {
+                        paramsToCallMethod.push(paramsMessage[paramType.name]);
+                    }
+            }
+        });
+
+        // Check if all params are ok
+        if (!validate) {
+            Log.error(TAG + "Error while executing " + methodDescriptor.methodName + " paramters missing)");
+            if (transport.type === EnumTransport.COMMAND) {
+                this.sendReply(transport.id, transport.src, {
+                    name: transport.message.data.name,
+                    params: { code: EnumError.PARAMS_MISSING },
+                });
+            }
+            return;
+        }
+
+        // All params are ok, call method
+        try {
+            const returnCode: string | void = methodDescriptor.method.apply(this, paramsToCallMethod);
+            if (typeof (returnCode) !== "undefined") {
+                this.sendReply(transport.id, transport.src, {
+                    name: transport.message.data.name,
+                    params: { code: returnCode },
+                });
+            }
+        } catch (e) {
+            Log.error(TAG + "Error while executing " + methodDescriptor.methodName + " with error ", e);
+            if (transport.type === EnumTransport.COMMAND) {
+                this.sendReply(transport.id, transport.src, {
+                    name: transport.message.data.name,
+                    params: { code: EnumError.UNKNOWN_ERROR },
                 });
             }
         }
@@ -158,8 +170,22 @@ export class MediaChannel extends Channel {
      * @param options - Options
      * @returns {EnumError}
      */
+    @MethodToCallByMessage({
+        message: EnumMediaMessage.PREPARE,
+        params: [
+            { name: "url", type: String },
+            { name: "title", type: String },
+            { name: "subtitle", type: String },
+            { name: "logo", type: String },
+            { name: "mediaType", type: EnumMedia },
+            { name: "transferMode", type: EnumTransferMode },
+            { name: "autoplay", type: Boolean },
+            { name: "frequency", type: Number },
+            { name: "options", type: null },
+        ],
+    })
     public doPrepare(url: string, title: string, subtitle: string, logo: string, mediaType: EnumMedia,
-                     transferMode: EnumTransferMode, autoplay: boolean, frequency: number, options: any): EnumError {
+        transferMode: EnumTransferMode, autoplay: boolean, frequency: number, options: any): EnumError {
         Log.debug(TAG + "onPrepare Receives (" + url + "," + title + "," + subtitle + "," + logo + "," + mediaType +
             "," + transferMode + "," + autoplay + "," + frequency + "," + options);
         if (!this.medias.hasOwnProperty(mediaType)) {
@@ -178,7 +204,16 @@ export class MediaChannel extends Channel {
      * @param audioTrack
      * @returns {EnumError} - Error code
      */
-    public doTrack(type: EnumTrack, trackId: string, enabled: boolean, options): EnumError {
+    @MethodToCallByMessage({
+        message: EnumMediaMessage.TRACK,
+        params: [
+            { name: "type", type: EnumTrack },
+            { name: "trackId", type: String },
+            { name: "enabled", type: Boolean },
+            { name: "options", type: null },
+        ],
+    })
+    public doTrack(type: EnumTrack, trackId: string, enabled: boolean, options: any): EnumError {
         Log.debug(TAG + "onTrack");
         if (!this.media) {
             return EnumError.NO_PLAYER_INITIALIZED;
@@ -192,6 +227,12 @@ export class MediaChannel extends Channel {
      * @param options
      * @returns {EnumError} - Error code
      */
+    @MethodToCallByMessage({
+        message: EnumMediaMessage.RESUME,
+        params: [
+            { name: "options", type: null },
+        ],
+    })
     public doResume(options: any): EnumError {
         Log.debug(TAG + "onResume");
         if (!this.media) {
@@ -211,6 +252,12 @@ export class MediaChannel extends Channel {
      * @param options
      * @returns {EnumError} - Error code
      */
+    @MethodToCallByMessage({
+        message: EnumMediaMessage.PAUSE,
+        params: [
+            { name: "options", type: null },
+        ],
+    })
     public doPause(options: any): EnumError {
         Log.debug(TAG + "onPause");
         if (!this.media) {
@@ -225,6 +272,12 @@ export class MediaChannel extends Channel {
      * @param options
      * @returns {EnumError} - Error code
      */
+    @MethodToCallByMessage({
+        message: EnumMediaMessage.STOP,
+        params: [
+            { name: "options", type: null },
+        ],
+    })
     public doStop(options: any): EnumError {
         Log.debug("onStop");
         if (!this.media) {
@@ -240,6 +293,12 @@ export class MediaChannel extends Channel {
      * @param options
      * @returns {EnumError} - Error code
      */
+    @MethodToCallByMessage({
+        message: EnumMediaMessage.CLOSE,
+        params: [
+            { name: "options", type: null },
+        ],
+    })
     public doClose(options: any): EnumError {
         Log.debug(TAG + "onClose");
         if (!this.media) {
@@ -256,7 +315,13 @@ export class MediaChannel extends Channel {
      * @param options
      * @returns {EnumError} - Error code
      */
-
+    @MethodToCallByMessage({
+        message: EnumMediaMessage.SEEK,
+        params: [
+            { name: "position", type: Number },
+            { name: "options", type: null },
+        ],
+    })
     public doSeek(position: number, options: any): EnumError {
 
         Log.debug(TAG + "onSeek");
@@ -274,6 +339,13 @@ export class MediaChannel extends Channel {
      * @param options
      * @returns {EnumError} - Error code
      */
+    @MethodToCallByMessage({
+        message: EnumMediaMessage.VOLUME,
+        params: [
+            { name: "volume", type: Number },
+            { name: "options", type: null },
+        ],
+    })
     public doVolume(volume: number, options: any): EnumError {
         Log.debug(TAG + "onVolume");
         if (!this.media) {
@@ -290,6 +362,13 @@ export class MediaChannel extends Channel {
      * @param options
      * @returns {EnumError} - Error code
      */
+    @MethodToCallByMessage({
+        message: EnumMediaMessage.MUTE,
+        params: [
+            { name: "mute", type: Boolean },
+            { name: "options", type: null },
+        ],
+    })
     public doMute(mute: boolean, options: any): EnumError {
         Log.debug(TAG + "onMute");
         if (!this.media) {
@@ -306,6 +385,14 @@ export class MediaChannel extends Channel {
      * @param options
      * @returns {EnumError} - Error code
      */
+    @MethodToCallByMessage({
+        message: EnumMediaMessage.GET_PLAYBACK_STATUS,
+        params: [
+            { name: "id", type: Number },
+            { name: "src", type: String },
+            { name: "options", type: null },
+        ],
+    })
     public doGetPlaybackStatus(id: number, src: string, options: any) {
         Log.debug(TAG + "onGetPlaybackStatus" + id + "," + src);
         if (!this.media) {
@@ -313,7 +400,7 @@ export class MediaChannel extends Channel {
         }
         let status: any = this.media.getPlaybackStatus();
         status.code = EnumError.OK;
-        this.sendReply(id, src, {name: MediaChannel.EVENTS.PLAYBACK_STATUS, params: status, options});
+        this.sendReply(id, src, { name: MediaChannel.EVENTS.PLAYBACK_STATUS, params: status, options });
     }
 
     /**
@@ -323,6 +410,14 @@ export class MediaChannel extends Channel {
      * @param  options
      * @returns {EnumError} - Error code
      */
+    @MethodToCallByMessage({
+        message: EnumMediaMessage.GET_METADATA,
+        params: [
+            { name: "id", type: Number },
+            { name: "src", type: String },
+            { name: "options", type: null },
+        ],
+    })
     public doGetMetadata(id: number, src: string, options: any) {
         Log.debug(TAG + "onGetMetadata " + id + "," + src);
         if (!this.media) {
@@ -330,7 +425,7 @@ export class MediaChannel extends Channel {
         }
         let status: any = this.media.getMedatadata();
         status.code = EnumError.OK;
-        this.sendReply(id, src, {name: MediaChannel.EVENTS.METADATA_CHANGED, params: status, options});
+        this.sendReply(id, src, { name: MediaChannel.EVENTS.METADATA_CHANGED, params: status, options });
     }
 
     /**
@@ -378,4 +473,47 @@ export class MediaChannel extends Channel {
         }
         return EnumError.OK;
     }
+}
+
+// Declare annotation
+/**
+ * Annotation to declare a link between a method and a message
+ * @param controlParams Details
+ */
+function MethodToCallByMessage(controlParams: IMethodToCallByMessage): Function {
+    return (target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<Function>) => {
+        // When a new method is detected, store his declaration
+        methodsByMessage[controlParams.message] = {
+            method: descriptor.value,
+            methodName: propertyKey,
+            params: controlParams.params,
+        };
+    };
+}
+
+// Interfacs to declare links between methods and messages
+/**
+ * Global option given to annotation MethodToCallByMessage.
+ * This interface describe the link between a method and a message
+ */
+interface IMethodToCallByMessage {
+    message: string;
+    params: IParamWithNameAndType[];
+}
+
+/**
+ * Declare type of each parameter
+ */
+interface IParamWithNameAndType {
+    name: string;
+    type: any;
+}
+
+/**
+ * Store declared link of method/message
+ */
+interface IMethodWithParams {
+    method: Function;
+    methodName: string;
+    params: IParamWithNameAndType[];
 }
