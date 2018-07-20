@@ -250,57 +250,81 @@ export class VideoMedia extends Media {
 
   private updateTracks() {
     // Catch AudioTracks
-    let i = 0;
     let tracks;
     tracks = [];
     // TODO: Refactor this code (redundancy)
-    let audioTracks = this.mediaElement.audioTracks;
+    const audioTracks = this.mediaElement.audioTracks;
     if (audioTracks) {
-      for (i = 0; i < audioTracks.length; i++) {
+      audioTracks.forEach((audioTrack: any, index: number) => {
+        if (!audioTrack.hasOwnProperty("enabled")) {
+          Log.info(TAG + " When extract metadatas, audio track " + index + " haven't enabled property defined");
+        }
+        if (!audioTrack.hasOwnProperty("language")) {
+          Log.info(TAG + " When extract metadatas, audio track " + index + " haven't language property defined");
+        }
+        if (!audioTrack.hasOwnProperty("label")) {
+          Log.info(TAG + " When extract metadatas, audio track " + index + " haven't label property defined");
+        }
         tracks.push(
           new Track(
             EnumTrack.AUDIO,
-            i.toString(),
-            audioTracks[i].enabled,
-            audioTracks[i].language,
-            audioTracks[i].label,
+            index.toString(),
+            audioTrack.enabled,
+            audioTrack.language,
+            audioTrack.label,
           ),
         );
-      }
+      });
       this.metadata.audioTracks = tracks;
     }
     // Catch VideoTracks
     tracks = [];
-    let videoTracks = this.mediaElement.videoTracks;
+    const videoTracks = this.mediaElement.videoTracks;
     if (videoTracks) {
-      for (i = 0; i < videoTracks.length; i++) {
+      videoTracks.forEach((videoTrack: any, index: number) => {
+        if (!videoTrack.hasOwnProperty("selected")) {
+          Log.info(TAG + " When extract metadatas, video track " + index + " haven't selected property defined"
+            + " (to set 'enabled' property)");
+        }
+        if (!videoTrack.hasOwnProperty("language")) {
+          Log.info(TAG + " When extract metadatas, video track " + index + " haven't language property defined");
+        }
+        if (!videoTrack.hasOwnProperty("label")) {
+          Log.info(TAG + " When extract metadatas, video track " + index + " haven't label property defined");
+        }
         tracks.push(
           new Track(
             EnumTrack.VIDEO,
-            i.toString(),
-            videoTracks[i].selected,
-            videoTracks[i].language,
-            videoTracks[i].label,
+            index.toString(),
+            videoTrack.selected,
+            videoTrack.language,
+            videoTrack.label,
           ),
         );
-      }
+      });
       this.metadata.videoTracks = tracks;
     }
     // Catch TextTracks
     tracks = [];
-    let textTracks = this.mediaElement.textTracks;
+    const textTracks = this.mediaElement.textTracks;
     if (textTracks) {
-      for (i = 0; i < textTracks.length; i++) {
+      textTracks.forEach((textTrack: any, index: number) => {
+        if (!textTrack.hasOwnProperty("language")) {
+          Log.info(TAG + " When extract metadatas, text track " + index + " haven't language property defined");
+        }
+        if (!textTrack.hasOwnProperty("label")) {
+          Log.info(TAG + " When extract metadatas, text track " + index + " haven't label property defined");
+        }
         tracks.push(
           new Track(
             EnumTrack.TEXT,
-            i.toString(),
-            textTracks[i].mode === "showing",
-            textTracks[i].language,
-            textTracks[i].label,
+            index.toString(),
+            textTrack.mode === "showing",
+            textTrack.language,
+            textTrack.label,
           ),
         );
-      }
+      });
       this.metadata.textTracks = tracks;
     }
   }

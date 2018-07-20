@@ -28,7 +28,7 @@ export class Track {
      * @param language
      * @param label
      */
-    constructor(public type: EnumTrack, public trackId: string, public enabled: boolean,
-                public language: string, public label: string) {
+    constructor(public type: EnumTrack, public trackId: string, public enabled: boolean = false,
+                public language: string = "", public label: string = "") {
     }
 }
