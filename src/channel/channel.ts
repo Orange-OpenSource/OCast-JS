@@ -18,7 +18,6 @@ import {OCast} from "../ocast";
 import {Transport} from "../protocol/transport";
 import {TransportMessage} from "../protocol/transport.message";
 import {EnumError} from "../type/enum.error";
-import {EnumProtocol} from "../type/enum.protocol";
 import {EnumTransport} from "../type/enum.transport";
 import {Logger} from "../util/logger";
 
@@ -65,7 +64,7 @@ export class Channel {
      */
     protected sendReply(id: number, dst: string, data: any) {
         const message = new Transport(UUID, dst, EnumTransport.REPLY, id, new TransportMessage(this.name, data));
-        message.setStatus(EnumProtocol.OK_STATUS as string);
+        message.setStatus("OK");
         Log.debug(TAG + "sendReply : " + JSON.stringify(message));
         this.sendMessage(message);
     }

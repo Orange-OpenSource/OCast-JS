@@ -20,7 +20,6 @@ import { WebappChannel } from "./channel/webapp.channel";
 import { Transport } from "./protocol/transport";
 import { TransportMessage } from "./protocol/transport.message";
 import { EnumError } from "./type/enum.error";
-import { EnumProtocol } from "./type/enum.protocol";
 import { EnumTransport } from "./type/enum.transport";
 import { Logger } from "./util/logger";
 
@@ -39,7 +38,7 @@ export class OCast {
    * OCast Root Object, create default channel 'webapp' and 'media'
    * @constructor
    */
-  constructor() {
+  constructor(private url: string = "wss://localhost:4433/ocast") {
     this.setupMediaChannel();
     this.setupWebappChannel();
   }
@@ -49,7 +48,7 @@ export class OCast {
    * @public
    */
   public start() {
-    this.ws = new WebSocket(EnumProtocol.PROTOCOL + EnumProtocol.HOST + ":" + EnumProtocol.PORT + EnumProtocol.PATH);
+    this.ws = new WebSocket(this.url);
     this.ws.onopen = this.onConnected.bind(this);
     this.ws.onmessage = this.onMessage.bind(this);
     this.ws.onerror = this.onError.bind(this);
