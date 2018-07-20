@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {OCast} from "../ocast";
-import {EnumProtocol} from "../type/enum.protocol";
 import {Logger} from "../util/logger";
 import {Channel} from "./channel";
 

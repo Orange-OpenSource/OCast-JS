@@ -19,10 +19,7 @@ global['WebSocket'] = WebSocket;
 const broker = d2r.broker;
 const client = d2r.client;
 
-let ocast: OCast = new OCast({
-    webSocketPort: 4434,
-    webSocketProtocol: "ws://",
-});
+let ocast: OCast = new OCast("ws://localhost:4434/ocast");
 let dummyVideoPlayer: VideoPlayer = new VideoPlayer();
 
 const Log: Logger = Logger.getInstance();

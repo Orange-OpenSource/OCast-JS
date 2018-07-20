@@ -17,11 +17,9 @@
 import { Channel } from "./channel/channel";
 import { MediaChannel } from "./channel/media.channel";
 import { WebappChannel } from "./channel/webapp.channel";
-import { IOcastInit } from "./i-ocast-init";
 import { Transport } from "./protocol/transport";
 import { TransportMessage } from "./protocol/transport.message";
 import { EnumError } from "./type/enum.error";
-import { EnumProtocol } from "./type/enum.protocol";
 import { EnumTransport } from "./type/enum.transport";
 import { Logger } from "./util/logger";
 
@@ -35,18 +33,14 @@ export class OCast {
   public debug = false;
   private ws: WebSocket = null;
   private channels: Channel[] = [];
-  private initParameters: IOcastInit = null;
 
   /**
    * OCast Root Object, create default channel 'webapp' and 'media'
    * @constructor
    */
-  constructor(initParameters?: IOcastInit) {
+  constructor(private url: string = "wss://localhost:4433/ocast") {
     this.setupMediaChannel();
     this.setupWebappChannel();
-    this.initParameters = initParameters || {};
-    this.initParameters.webSocketProtocol = this.initParameters.webSocketProtocol || EnumProtocol.PROTOCOL;
-    this.initParameters.webSocketPort = this.initParameters.webSocketPort || EnumProtocol.PORT;
   }
 
   /**
@@ -54,9 +48,7 @@ export class OCast {
    * @public
    */
   public start() {
-    const url = this.initParameters.webSocketProtocol + EnumProtocol.HOST + ":" +
-      this.initParameters.webSocketPort + EnumProtocol.PATH;
-    this.ws = new WebSocket(url);
+    this.ws = new WebSocket(this.url);
     this.ws.onopen = this.onConnected.bind(this);
     this.ws.onmessage = this.onMessage.bind(this);
     this.ws.onerror = this.onError.bind(this);
