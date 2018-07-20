@@ -248,6 +248,30 @@ export class VideoMedia extends Media {
     }
   }
 
+  /**
+   * Check if all fields are fill on a track
+   * @param track Track to check
+   * @param type Track type (video, audio, text)
+   * @param trackNumber Track index
+   * @param properties Properties to check into track
+   */
+  private logTrackMissingFields(track: any, type: string, trackNumber: number,
+    properties: Array<{ src: string, dest?: string }>): void {
+    properties.forEach((property) => {
+      if (!property.dest) {
+        property.dest = property.src;
+      }
+      if (!track.hasOwnProperty(property.src)) {
+        let logText: string = TAG + " When extract metadatas, " + type + " track " + trackNumber + " haven't " +
+          property.src + " property defined";
+        if (property.dest !== property.src) {
+          logText += " (to set '" + property.dest + "' property)";
+        }
+        Log.info(logText);
+      }
+    });
+  }
+
   private updateTracks() {
     // Catch AudioTracks
     let tracks;
@@ -256,15 +280,11 @@ export class VideoMedia extends Media {
     const audioTracks = this.mediaElement.audioTracks;
     if (audioTracks) {
       audioTracks.forEach((audioTrack: any, index: number) => {
-        if (!audioTrack.hasOwnProperty("enabled")) {
-          Log.info(TAG + " When extract metadatas, audio track " + index + " haven't enabled property defined");
-        }
-        if (!audioTrack.hasOwnProperty("language")) {
-          Log.info(TAG + " When extract metadatas, audio track " + index + " haven't language property defined");
-        }
-        if (!audioTrack.hasOwnProperty("label")) {
-          Log.info(TAG + " When extract metadatas, audio track " + index + " haven't label property defined");
-        }
+        this.logTrackMissingFields(audioTrack, "audio", index, [
+          {src: "enabled"},
+          {src: "language"},
+          {src: "label"},
+        ]);
         tracks.push(
           new Track(
             EnumTrack.AUDIO,
@@ -282,16 +302,11 @@ export class VideoMedia extends Media {
     const videoTracks = this.mediaElement.videoTracks;
     if (videoTracks) {
       videoTracks.forEach((videoTrack: any, index: number) => {
-        if (!videoTrack.hasOwnProperty("selected")) {
-          Log.info(TAG + " When extract metadatas, video track " + index + " haven't selected property defined"
-            + " (to set 'enabled' property)");
-        }
-        if (!videoTrack.hasOwnProperty("language")) {
-          Log.info(TAG + " When extract metadatas, video track " + index + " haven't language property defined");
-        }
-        if (!videoTrack.hasOwnProperty("label")) {
-          Log.info(TAG + " When extract metadatas, video track " + index + " haven't label property defined");
-        }
+        this.logTrackMissingFields(videoTrack, "audio", index, [
+          {src: "selected", dest: "enabled"},
+          {src: "language"},
+          {src: "label"},
+        ]);
         tracks.push(
           new Track(
             EnumTrack.VIDEO,
@@ -309,12 +324,10 @@ export class VideoMedia extends Media {
     const textTracks = this.mediaElement.textTracks;
     if (textTracks) {
       textTracks.forEach((textTrack: any, index: number) => {
-        if (!textTrack.hasOwnProperty("language")) {
-          Log.info(TAG + " When extract metadatas, text track " + index + " haven't language property defined");
-        }
-        if (!textTrack.hasOwnProperty("label")) {
-          Log.info(TAG + " When extract metadatas, text track " + index + " haven't label property defined");
-        }
+        this.logTrackMissingFields(textTrack, "audio", index, [
+          {src: "language"},
+          {src: "label"},
+        ]);
         tracks.push(
           new Track(
             EnumTrack.TEXT,
