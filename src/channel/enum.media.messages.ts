@@ -1,3 +1,4 @@
+
 export enum EnumMediaMessage {
     PAUSE = "pause",
     RESUME = "resume",
@@ -9,5 +10,5 @@ export enum EnumMediaMessage {
     GET_PLAYBACK_STATUS = "getPlaybackStatus",
     GET_METADATA = "getMetadata",
     MUTE = "mute",
-    PREPARE = "prepare"
-}
+    PREPARE = "prepare",
+};

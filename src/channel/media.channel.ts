@@ -28,14 +28,14 @@ import {EnumTransferMode} from "../type/enum.transfermode";
 import {EnumTransport} from "../type/enum.transport";
 import {Logger} from "../util/logger";
 import {Channel} from "./channel";
+import {EnumMediaMessage} from "./enum.media.messages";
 import {IMediaNotifier} from "./media.notifier";
-import {EnumMediaMessage} from './enum.media.messages';
 
 const TAG: string = " [MediaChannel] ";
 const Log: Logger = Logger.getInstance();
 
-//Manage annotations to call methods by transport message
-//Store all methods/message type
+// Manage annotations to call methods by transport message
+// Store all methods/message type
 const methodsByMessage: { [key: string]: IMethodWithParams } = {};
 
 /**
@@ -84,11 +84,10 @@ export class MediaChannel extends Channel {
 
     /**
      * Implements specific parsing for this channel
-     * 
      * @param {Transport} transport - Message to send
      */
     public onMessage(transport: Transport): void {
-        //Check if message is supported
+        // Check if message is supported
         if (!methodsByMessage[transport.message.data.name]) {
             Log.error(TAG + "Message type '" + transport.message.data.name + "' unknown");
             if (transport.type === EnumTransport.COMMAND) {
@@ -100,7 +99,7 @@ export class MediaChannel extends Channel {
             return;
         }
 
-        //Explode message to call method
+        // Explode message to call method
         const methodDescriptor: IMethodWithParams = methodsByMessage[transport.message.data.name];
         const paramsToCallMethod: any[] = [];
         const paramsMessage: {} = transport.message.data.params || {};
@@ -126,7 +125,7 @@ export class MediaChannel extends Channel {
             }
         });
 
-        //Check if all params are ok
+        // Check if all params are ok
         if (!validate) {
             Log.error(TAG + "Error while executing " + methodDescriptor.methodName + " paramters missing)");
             if (transport.type === EnumTransport.COMMAND) {
@@ -138,7 +137,7 @@ export class MediaChannel extends Channel {
             return;
         }
 
-        //All params are ok, call method
+        // All params are ok, call method
         try {
             const returnCode: string | void = methodDescriptor.method.apply(this, paramsToCallMethod);
             if (typeof (returnCode) !== "undefined") {
@@ -182,8 +181,8 @@ export class MediaChannel extends Channel {
             { name: "transferMode", type: EnumTransferMode },
             { name: "autoplay", type: Boolean },
             { name: "frequency", type: Number },
-            { name: "options", type: null }
-        ]
+            { name: "options", type: null },
+        ],
     })
     public doPrepare(url: string, title: string, subtitle: string, logo: string, mediaType: EnumMedia,
         transferMode: EnumTransferMode, autoplay: boolean, frequency: number, options: any): EnumError {
@@ -211,8 +210,8 @@ export class MediaChannel extends Channel {
             { name: "type", type: EnumTrack },
             { name: "trackId", type: String },
             { name: "enabled", type: Boolean },
-            { name: "options", type: null }
-        ]
+            { name: "options", type: null },
+        ],
     })
     public doTrack(type: EnumTrack, trackId: string, enabled: boolean, options: any): EnumError {
         Log.debug(TAG + "onTrack");
@@ -231,8 +230,8 @@ export class MediaChannel extends Channel {
     @MethodToCallByMessage({
         message: EnumMediaMessage.RESUME,
         params: [
-            { name: "options", type: null }
-        ]
+            { name: "options", type: null },
+        ],
     })
     public doResume(options: any): EnumError {
         Log.debug(TAG + "onResume");
@@ -256,8 +255,8 @@ export class MediaChannel extends Channel {
     @MethodToCallByMessage({
         message: EnumMediaMessage.PAUSE,
         params: [
-            { name: "options", type: null }
-        ]
+            { name: "options", type: null },
+        ],
     })
     public doPause(options: any): EnumError {
         Log.debug(TAG + "onPause");
@@ -276,8 +275,8 @@ export class MediaChannel extends Channel {
     @MethodToCallByMessage({
         message: EnumMediaMessage.STOP,
         params: [
-            { name: "options", type: null }
-        ]
+            { name: "options", type: null },
+        ],
     })
     public doStop(options: any): EnumError {
         Log.debug("onStop");
@@ -297,8 +296,8 @@ export class MediaChannel extends Channel {
     @MethodToCallByMessage({
         message: EnumMediaMessage.CLOSE,
         params: [
-            { name: "options", type: null }
-        ]
+            { name: "options", type: null },
+        ],
     })
     public doClose(options: any): EnumError {
         Log.debug(TAG + "onClose");
@@ -320,8 +319,8 @@ export class MediaChannel extends Channel {
         message: EnumMediaMessage.SEEK,
         params: [
             { name: "position", type: Number },
-            { name: "options", type: null }
-        ]
+            { name: "options", type: null },
+        ],
     })
     public doSeek(position: number, options: any): EnumError {
 
@@ -344,8 +343,8 @@ export class MediaChannel extends Channel {
         message: EnumMediaMessage.VOLUME,
         params: [
             { name: "volume", type: Number },
-            { name: "options", type: null }
-        ]
+            { name: "options", type: null },
+        ],
     })
     public doVolume(volume: number, options: any): EnumError {
         Log.debug(TAG + "onVolume");
@@ -367,8 +366,8 @@ export class MediaChannel extends Channel {
         message: EnumMediaMessage.MUTE,
         params: [
             { name: "mute", type: Boolean },
-            { name: "options", type: null }
-        ]
+            { name: "options", type: null },
+        ],
     })
     public doMute(mute: boolean, options: any): EnumError {
         Log.debug(TAG + "onMute");
@@ -391,8 +390,8 @@ export class MediaChannel extends Channel {
         params: [
             { name: "id", type: Number },
             { name: "src", type: String },
-            { name: "options", type: null }
-        ]
+            { name: "options", type: null },
+        ],
     })
     public doGetPlaybackStatus(id: number, src: string, options: any) {
         Log.debug(TAG + "onGetPlaybackStatus" + id + "," + src);
@@ -416,8 +415,8 @@ export class MediaChannel extends Channel {
         params: [
             { name: "id", type: Number },
             { name: "src", type: String },
-            { name: "options", type: null }
-        ]
+            { name: "options", type: null },
+        ],
     })
     public doGetMetadata(id: number, src: string, options: any) {
         Log.debug(TAG + "onGetMetadata " + id + "," + src);
@@ -476,24 +475,23 @@ export class MediaChannel extends Channel {
     }
 }
 
-//Declare annotation
+// Declare annotation
 /**
  * Annotation to declare a link between a method and a message
- * 
  * @param controlParams Details
  */
-function MethodToCallByMessage(controlParams: IMethodToCallByMessage): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void {
-    return function (target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<Function>) {
-        //When a new method is detected, store his declaration
+function MethodToCallByMessage(controlParams: IMethodToCallByMessage): Function {
+    return (target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<Function>) => {
+        // When a new method is detected, store his declaration
         methodsByMessage[controlParams.message] = {
             method: descriptor.value,
             methodName: propertyKey,
-            params: controlParams.params
+            params: controlParams.params,
         };
-    }
+    };
 }
 
-//Interfacs to declare links between methods and messages
+// Interfacs to declare links between methods and messages
 /**
  * Global option given to annotation MethodToCallByMessage.
  * This interface describe the link between a method and a message
@@ -507,7 +505,7 @@ interface IMethodToCallByMessage {
  * Declare type of each parameter
  */
 interface IParamWithNameAndType {
-    name: string,
+    name: string;
     type: any;
 }
 
