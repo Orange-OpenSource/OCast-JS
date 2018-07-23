@@ -248,59 +248,96 @@ export class VideoMedia extends Media {
     }
   }
 
+  /**
+   * Check if all fields are fill on a track
+   * @param track Track to check
+   * @param type Track type (video, audio, text)
+   * @param trackNumber Track index
+   * @param properties Properties to check into track
+   */
+  private logTrackMissingFields(track: any, type: string, trackNumber: number,
+    properties: Array<{ src: string, dest?: string }>): void {
+    properties.forEach((property) => {
+      if (!property.dest) {
+        property.dest = property.src;
+      }
+      if (!track.hasOwnProperty(property.src)) {
+        let logText: string = TAG + " When extract metadatas, " + type + " track " + trackNumber + " haven't " +
+          property.src + " property defined";
+        if (property.dest !== property.src) {
+          logText += " (to set '" + property.dest + "' property)";
+        }
+        Log.info(logText);
+      }
+    });
+  }
+
   private updateTracks() {
     // Catch AudioTracks
-    let i = 0;
     let tracks;
     tracks = [];
     // TODO: Refactor this code (redundancy)
-    let audioTracks = this.mediaElement.audioTracks;
+    const audioTracks = this.mediaElement.audioTracks;
     if (audioTracks) {
-      for (i = 0; i < audioTracks.length; i++) {
+      audioTracks.forEach((audioTrack: any, index: number) => {
+        this.logTrackMissingFields(audioTrack, "audio", index, [
+          {src: "enabled"},
+          {src: "language"},
+          {src: "label"},
+        ]);
         tracks.push(
           new Track(
             EnumTrack.AUDIO,
-            i.toString(),
-            audioTracks[i].enabled,
-            audioTracks[i].language,
-            audioTracks[i].label,
+            index.toString(),
+            audioTrack.enabled,
+            audioTrack.language,
+            audioTrack.label,
           ),
         );
-      }
+      });
       this.metadata.audioTracks = tracks;
     }
     // Catch VideoTracks
     tracks = [];
-    let videoTracks = this.mediaElement.videoTracks;
+    const videoTracks = this.mediaElement.videoTracks;
     if (videoTracks) {
-      for (i = 0; i < videoTracks.length; i++) {
+      videoTracks.forEach((videoTrack: any, index: number) => {
+        this.logTrackMissingFields(videoTrack, "audio", index, [
+          {src: "selected", dest: "enabled"},
+          {src: "language"},
+          {src: "label"},
+        ]);
         tracks.push(
           new Track(
             EnumTrack.VIDEO,
-            i.toString(),
-            videoTracks[i].selected,
-            videoTracks[i].language,
-            videoTracks[i].label,
+            index.toString(),
+            videoTrack.selected,
+            videoTrack.language,
+            videoTrack.label,
           ),
         );
-      }
+      });
       this.metadata.videoTracks = tracks;
     }
     // Catch TextTracks
     tracks = [];
-    let textTracks = this.mediaElement.textTracks;
+    const textTracks = this.mediaElement.textTracks;
     if (textTracks) {
-      for (i = 0; i < textTracks.length; i++) {
+      textTracks.forEach((textTrack: any, index: number) => {
+        this.logTrackMissingFields(textTrack, "audio", index, [
+          {src: "language"},
+          {src: "label"},
+        ]);
         tracks.push(
           new Track(
             EnumTrack.TEXT,
-            i.toString(),
-            textTracks[i].mode === "showing",
-            textTracks[i].language,
-            textTracks[i].label,
+            index.toString(),
+            textTrack.mode === "showing",
+            textTrack.language,
+            textTrack.label,
           ),
         );
-      }
+      });
       this.metadata.textTracks = tracks;
     }
   }

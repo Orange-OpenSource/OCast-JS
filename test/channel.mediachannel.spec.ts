@@ -5,10 +5,8 @@ import {Logger} from "../src/util/logger";
 import {VideoPlayer} from "./mock/video.player";
 
 import d2r = require("ocast-dongletv");
-import assert = require("assert");
 import chai = require("chai");
 import os = require("os");
-import util = require("util");
 
 const expect = chai.expect;
 
