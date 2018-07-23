@@ -183,7 +183,6 @@ describe("MediaChannel", () => {
                 client.getPlaybackStatus(resolve);
             } );
             return testPromise.then((result) => {
-                let expected =
                 expect(result).to.equal(getExpectedStatus(3, EnumError.OK));
             });
         });

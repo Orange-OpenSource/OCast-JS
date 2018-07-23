@@ -277,9 +277,10 @@ export class VideoMedia extends Media {
     let tracks;
     tracks = [];
     // TODO: Refactor this code (redundancy)
-    const audioTracks = this.mediaElement.audioTracks;
+    const audioTracks: AudioTrackList = this.mediaElement.audioTracks;
     if (audioTracks) {
-      audioTracks.forEach((audioTrack: any, index: number) => {
+      for (let index = 0; index < audioTracks.length; index++) {
+        const audioTrack: AudioTrack = audioTracks[index];
         this.logTrackMissingFields(audioTrack, "audio", index, [
           {src: "enabled"},
           {src: "language"},
@@ -294,14 +295,15 @@ export class VideoMedia extends Media {
             audioTrack.label,
           ),
         );
-      });
+      }
       this.metadata.audioTracks = tracks;
     }
     // Catch VideoTracks
     tracks = [];
-    const videoTracks = this.mediaElement.videoTracks;
+    const videoTracks: VideoTrackList = this.mediaElement.videoTracks;
     if (videoTracks) {
-      videoTracks.forEach((videoTrack: any, index: number) => {
+      for (let index = 0; index < videoTracks.length; index++) {
+        const videoTrack: VideoTrack = videoTracks[index];
         this.logTrackMissingFields(videoTrack, "audio", index, [
           {src: "selected", dest: "enabled"},
           {src: "language"},
@@ -316,14 +318,15 @@ export class VideoMedia extends Media {
             videoTrack.label,
           ),
         );
-      });
+      };
       this.metadata.videoTracks = tracks;
     }
     // Catch TextTracks
     tracks = [];
-    const textTracks = this.mediaElement.textTracks;
+    const textTracks: TextTrackList = this.mediaElement.textTracks;
     if (textTracks) {
-      textTracks.forEach((textTrack: any, index: number) => {
+      for (let index = 0; index < textTracks.length; index++) {
+        const textTrack: TextTrack = textTracks[index];
         this.logTrackMissingFields(textTrack, "audio", index, [
           {src: "language"},
           {src: "label"},
@@ -337,7 +340,7 @@ export class VideoMedia extends Media {
             textTrack.label,
           ),
         );
-      });
+      };
       this.metadata.textTracks = tracks;
     }
   }
