@@ -200,7 +200,8 @@ export abstract class Media {
 
     // Dispatch Event If Needed
     if (previousStatus !== this.mediaElement.status) {
-      this.mediaChannel.onUpdateStatus(this.mediaElement.status);
+      this.lastUpdate = newUpdate;
+      this.mediaChannel.onUpdateStatus(this.getPlaybackStatus());
     } else if (
       this.updateFrequency !== 0 &&
       newUpdate > this.lastUpdate + this.updateFrequency * 1000
