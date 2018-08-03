@@ -464,7 +464,7 @@ export class MediaChannel extends Channel {
     private callNotifier(method: string, args): EnumError {
         if (this.notifier !== undefined) {
             try {
-                return this.notifier[method].apply(this, args);
+                return this.notifier[method].apply(this.notifier, args);
             } catch (e) {
                 Log.error(TAG + "Implementation error on Notifier Method " + method + " : ", e);
                 Log.error(TAG + "Implementation error on Notifier Method " + method + " : ", e);
