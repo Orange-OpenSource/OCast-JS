@@ -55,7 +55,10 @@ export class OCast {
         this.onConnected();
       };
       this.ws.onmessage = this.onMessage.bind(this);
-      this.ws.onerror = this.onError.bind(this);
+      this.ws.onerror = (e: Event) => {
+        reject(e);
+        this.onError(e);
+      };
       this.ws.onclose = this.onClose.bind(this);
     });
   }
