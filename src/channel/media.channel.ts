@@ -139,12 +139,31 @@ export class MediaChannel extends Channel {
 
         // All params are ok, call method
         try {
-            const returnCode: string | void = methodDescriptor.method.apply(this, paramsToCallMethod);
+            const returnCode: EnumError | Promise<EnumError> = methodDescriptor.method.apply(this, paramsToCallMethod);
             if (typeof (returnCode) !== "undefined") {
-                this.sendReply(transport.id, transport.src, {
-                    name: transport.message.data.name,
-                    params: { code: returnCode },
-                });
+                if (returnCode.hasOwnProperty("then")) {
+                    (<Promise<EnumError>> returnCode).then((result: EnumError) => {
+                        if (typeof (result) !== "undefined") {
+                            this.sendReply(transport.id, transport.src, {
+                                name: transport.message.data.name,
+                                params: { code: result },
+                            });
+                        }
+                    }, (e) => {
+                        Log.error(TAG + "Error while executing " + methodDescriptor.methodName + " with error ", e);
+                        if (transport.type === EnumTransport.COMMAND) {
+                            this.sendReply(transport.id, transport.src, {
+                                name: transport.message.data.name,
+                                params: { code: EnumError.UNKNOWN_ERROR },
+                            });
+                        }
+                    });
+                } else {
+                    this.sendReply(transport.id, transport.src, {
+                        name: transport.message.data.name,
+                        params: { code: returnCode },
+                    });
+                }
             }
         } catch (e) {
             Log.error(TAG + "Error while executing " + methodDescriptor.methodName + " with error ", e);
@@ -185,7 +204,8 @@ export class MediaChannel extends Channel {
         ],
     })
     public doPrepare(url: string, title: string, subtitle: string, logo: string, mediaType: EnumMedia,
-        transferMode: EnumTransferMode, autoplay: boolean, frequency: number, options: any): EnumError {
+        transferMode: EnumTransferMode, autoplay: boolean, frequency: number,
+        options: any): EnumError | Promise<EnumError> {
         Log.debug(TAG + "onPrepare Receives (" + url + "," + title + "," + subtitle + "," + logo + "," + mediaType +
             "," + transferMode + "," + autoplay + "," + frequency + "," + options);
         if (!this.medias.hasOwnProperty(mediaType)) {
@@ -213,7 +233,7 @@ export class MediaChannel extends Channel {
             { name: "options", type: null },
         ],
     })
-    public doTrack(type: EnumTrack, trackId: string, enabled: boolean, options: any): EnumError {
+    public doTrack(type: EnumTrack, trackId: string, enabled: boolean, options: any): EnumError | Promise<EnumError> {
         Log.debug(TAG + "onTrack");
         if (!this.media) {
             return EnumError.NO_PLAYER_INITIALIZED;
@@ -233,7 +253,7 @@ export class MediaChannel extends Channel {
             { name: "options", type: null },
         ],
     })
-    public doResume(options: any): EnumError {
+    public doResume(options: any): EnumError | Promise<EnumError> {
         Log.debug(TAG + "onResume");
         if (!this.media) {
             return EnumError.NO_PLAYER_INITIALIZED;
@@ -258,7 +278,7 @@ export class MediaChannel extends Channel {
             { name: "options", type: null },
         ],
     })
-    public doPause(options: any): EnumError {
+    public doPause(options: any): EnumError | Promise<EnumError> {
         Log.debug(TAG + "onPause");
         if (!this.media) {
             return EnumError.NO_PLAYER_INITIALIZED;
@@ -278,7 +298,7 @@ export class MediaChannel extends Channel {
             { name: "options", type: null },
         ],
     })
-    public doStop(options: any): EnumError {
+    public doStop(options: any): EnumError | Promise<EnumError> {
         Log.debug("onStop");
         if (!this.media) {
             return EnumError.NO_PLAYER_INITIALIZED;
@@ -299,7 +319,7 @@ export class MediaChannel extends Channel {
             { name: "options", type: null },
         ],
     })
-    public doClose(options: any): EnumError {
+    public doClose(options: any): EnumError | Promise<EnumError> {
         Log.debug(TAG + "onClose");
         if (!this.media) {
             return EnumError.NO_PLAYER_INITIALIZED;
@@ -322,7 +342,7 @@ export class MediaChannel extends Channel {
             { name: "options", type: null },
         ],
     })
-    public doSeek(position: number, options: any): EnumError {
+    public doSeek(position: number, options: any): EnumError | Promise<EnumError> {
 
         Log.debug(TAG + "onSeek");
         if (!this.media) {
@@ -346,7 +366,7 @@ export class MediaChannel extends Channel {
             { name: "options", type: null },
         ],
     })
-    public doVolume(volume: number, options: any): EnumError {
+    public doVolume(volume: number, options: any): EnumError | Promise<EnumError> {
         Log.debug(TAG + "onVolume");
         if (!this.media) {
             return EnumError.NO_PLAYER_INITIALIZED;
@@ -369,7 +389,7 @@ export class MediaChannel extends Channel {
             { name: "options", type: null },
         ],
     })
-    public doMute(mute: boolean, options: any): EnumError {
+    public doMute(mute: boolean, options: any): EnumError | Promise<EnumError> {
         Log.debug(TAG + "onMute");
         if (!this.media) {
             return EnumError.NO_PLAYER_INITIALIZED;
@@ -461,7 +481,7 @@ export class MediaChannel extends Channel {
         this.callNotifier("onUpdateMetadata", arguments);
     }
 
-    private callNotifier(method: string, args): EnumError {
+    private callNotifier(method: string, args): EnumError | Promise<EnumError> {
         if (this.notifier !== undefined) {
             try {
                 return this.notifier[method].apply(this.notifier, args);

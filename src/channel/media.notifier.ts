@@ -37,14 +37,15 @@ export interface IMediaNotifier {
      * @returns {EnumError}
      */
     onPrepare(url: string, title: string, subtitle: string, logo: string, mediaType: EnumMedia,
-                         transferMode: EnumTransferMode, autoplay: boolean, frequency: number, options: any): EnumError;
+                         transferMode: EnumTransferMode, autoplay: boolean, frequency: number,
+                         options: any): EnumError | Promise<EnumError>;
 
     /**
      * pause
      * @param options
      * @returns {EnumError} - Error code
      */
-    onPause(options: any): EnumError;
+    onPause(options: any): EnumError | Promise<EnumError>;
 
     /**
      * track
@@ -54,28 +55,28 @@ export interface IMediaNotifier {
      * @param options
      * @returns {EnumError} - Error code
      */
-    onTrack(type: EnumTrack, trackId: string, enabled: boolean, options): EnumError;
+    onTrack(type: EnumTrack, trackId: string, enabled: boolean, options): EnumError | Promise<EnumError>;
 
     /**
      * resume
      * @param options
      * @returns {EnumError} - Error code
      */
-    onResume(options: any): EnumError;
+    onResume(options: any): EnumError | Promise<EnumError>;
 
     /**
      * stop
      * @param options
      * @returns {EnumError} - Error code
      */
-    onStop(options: any): EnumError;
+    onStop(options: any): EnumError | Promise<EnumError>;
 
     /**
      * close
      * @param options
      * @returns {EnumError} - Error code
      */
-    onClose(options: any): EnumError;
+    onClose(options: any): EnumError | Promise<EnumError>;
 
     /**
      * on Seek
@@ -83,7 +84,7 @@ export interface IMediaNotifier {
      * @param options
      * @returns {EnumError} - Error code
      */
-    onSeek(position: number, options: any): EnumError;
+    onSeek(position: number, options: any): EnumError | Promise<EnumError>;
 
     /**
      * Implements  volume command
@@ -91,7 +92,7 @@ export interface IMediaNotifier {
      * @param options
      * @returns {EnumError} - Error code
      */
-    onVolume(volume: number, options: any): EnumError;
+    onVolume(volume: number, options: any): EnumError | Promise<EnumError>;
 
     /**
      * Send a mute command
@@ -99,7 +100,7 @@ export interface IMediaNotifier {
      * @param options
      * @returns {EnumError} - Error code
      */
-     onMute(mute: boolean, options: any): EnumError;
+     onMute(mute: boolean, options: any): EnumError | Promise<EnumError>;
 
     /**
      * @param {PlaybackStatus} status
