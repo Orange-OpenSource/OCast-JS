@@ -47,12 +47,17 @@ export class OCast {
    * Public function to Start initialization
    * @public
    */
-  public start() {
-    this.ws = new WebSocket(this.url);
-    this.ws.onopen = this.onConnected.bind(this);
-    this.ws.onmessage = this.onMessage.bind(this);
-    this.ws.onerror = this.onError.bind(this);
-    this.ws.onclose = this.onClose.bind(this);
+  public start(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.ws = new WebSocket(this.url);
+      this.ws.onopen = () => {
+        resolve();
+        this.onConnected();
+      };
+      this.ws.onmessage = this.onMessage.bind(this);
+      this.ws.onerror = this.onError.bind(this);
+      this.ws.onclose = this.onClose.bind(this);
+    });
   }
 
   /**
@@ -168,7 +173,7 @@ export class OCast {
    * Send Connected Event when Connection Opened
    * @param event
    */
-  private onConnected(event) {
+  private onConnected() {
     Log.info(TAG + "websocket onConnected event");
     this.updateSocketChannel();
   }

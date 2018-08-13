@@ -32,3 +32,4 @@ export {Metadata} from "./protocol/metadata";
 export {VideoPlaybackStatus} from "./media/video.playback.status";
 export {Logger} from "./util/logger";
 export {OCast} from "./ocast";
+export { Transport } from "./protocol/transport";
