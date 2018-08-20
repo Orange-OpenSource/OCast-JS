@@ -108,6 +108,13 @@ export class OCast {
    * Initialize MediaChannel
    * @private
    */
+  public setupChannel(channel: Channel): void {
+    this.channels[channel.name] = channel;
+  }
+  /**
+   * Initialize MediaChannel
+   * @private
+   */
   private setupMediaChannel() {
     let channel = new MediaChannel();
     this.channels[channel.name] = channel;
