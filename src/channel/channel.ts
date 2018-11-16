@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {OCast} from "../ocast";
 import {Transport} from "../protocol/transport";
 import {TransportMessage} from "../protocol/transport.message";
 import {EnumError} from "../type/enum.error";
@@ -32,6 +31,7 @@ const Log: Logger = Logger.getInstance();
  */
 export class Channel {
     protected static sequenceMessage: number = 1;
+    private waitingReplies: {[key: string]: (transport: Transport) => void} = {};
 
     private ws: WebSocket = null;
 
@@ -52,6 +52,14 @@ export class Channel {
      * @param {Transport} transport - message received
      */
     public onMessage(transport: Transport) {
+        if (transport.type === EnumTransport.REPLY) {
+            const id = transport.id;
+            if (this.waitingReplies[id]) {
+                this.waitingReplies[id](transport.message.data);
+                delete this.waitingReplies[id];
+            }
+            return;
+        }
         Log.warn(TAG + "onMessage need to be implemented for namespace " + this.name);
         this.sendReply(transport.id, transport.src, {params: {code: EnumError.NO_IMPLEMENTATION}});
     }
@@ -89,7 +97,10 @@ export class Channel {
         const message = new Transport(UUID, dst, EnumTransport.COMMAND, Channel.sequenceMessage++,
             new TransportMessage(this.name, data));
         Log.debug(TAG + "sendCommand : " + JSON.stringify(message));
-        this.sendMessage(message);
+        return new Promise((resolve, reject) => {
+            this.waitingReplies[message.id] = resolve;
+            this.sendMessage(message);
+        });
     }
 
     /**
