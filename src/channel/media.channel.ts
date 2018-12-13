@@ -141,7 +141,8 @@ export class MediaChannel extends Channel {
         try {
             const returnCode: EnumError | Promise<EnumError> = methodDescriptor.method.apply(this, paramsToCallMethod);
             if (typeof (returnCode) !== "undefined") {
-                if (returnCode.hasOwnProperty("then")) {
+                // tslint:disable-next-line:no-string-literal
+                if (typeof returnCode["then"] === "function") {
                     (<Promise<EnumError>> returnCode).then((result: EnumError) => {
                         if (typeof (result) !== "undefined") {
                             this.sendReply(transport.id, transport.src, {
