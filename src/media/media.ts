@@ -56,17 +56,9 @@ export abstract class Media {
    * @returns {any}
    */
   public getStatus(): EnumMediaStatus {
-    if (this.mediaElement.seeking) {
-      return EnumMediaStatus.BUFFERING;
-    }
-    if (this.mediaElement.ended) {
-      return EnumMediaStatus.IDLE;
-    }
-    if (this.mediaElement.paused) {
-      return EnumMediaStatus.PAUSED;
-    } else {
-      return EnumMediaStatus.PLAYING;
-    }
+    return this.mediaElement
+      ? (this.mediaElement.status as EnumMediaStatus)
+      : null;
   }
 
   /**
