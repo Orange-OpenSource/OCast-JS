@@ -14,7 +14,10 @@
     "test": "nyc mocha --require ts-node/register",
     "doc": "typedoc --out public --exclude ./test --exclude ./node_modules ./src"
   },
-  "repository": "ocast-sdk",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Orange-OpenSource/OCast-JS"
+  },
   "reporters": [
     {
       "name": "jasmine-spec-reporter#SpecReporter",
