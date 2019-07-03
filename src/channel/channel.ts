@@ -19,9 +19,10 @@ import {TransportMessage} from "../protocol/transport.message";
 import {EnumError} from "../type/enum.error";
 import {EnumTransport} from "../type/enum.transport";
 import {Logger} from "../util/logger";
+import {uuid} from "../util/uuid";
 
 const TAG: string = " [Channel] ";
-const UUID: string = "browser";
+const UUID: string = uuid();
 const WILDCARD: string = "*";
 
 const Log: Logger = Logger.getInstance();
