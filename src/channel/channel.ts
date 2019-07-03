@@ -66,10 +66,23 @@ export class Channel {
     }
 
     /**
+     * send Reply Command
+     * @param {number} id - Request identifier
+     * @param {string} dst - Destination identifier
+     * @param {any} data - Data of the reply
+     */
+    protected sendReply(id: number, dst: string, data: any) {
+        const message = new Transport(UUID, dst, EnumTransport.REPLY, id, new TransportMessage(this.name, data));
+        message.setStatus("OK");
+        Log.debug(TAG + "sendReply : " + JSON.stringify(message));
+        this.sendMessage(message);
+    }
+
+    /**
      * sendEvent
      * @param {any} data - Data of the event
      */
-    public sendEvent(data: any) {
+    protected sendEvent(data: any) {
         const message = new Transport(UUID, WILDCARD, EnumTransport.EVENT, Channel.sequenceMessage++,
             new TransportMessage(this.name, data));
         Log.debug(TAG + "sendEvent : " + JSON.stringify(message));
@@ -81,7 +94,7 @@ export class Channel {
      * @param {string} dst - Destination identifier
      * @param {any} data - Data of the command
      */
-    public sendCommand(dst: string, data: any) {
+    protected sendCommand(dst: string, data: any) {
         const message = new Transport(UUID, dst, EnumTransport.COMMAND, Channel.sequenceMessage++,
             new TransportMessage(this.name, data));
         Log.debug(TAG + "sendCommand : " + JSON.stringify(message));
@@ -89,19 +102,6 @@ export class Channel {
             this.waitingReplies[message.id] = resolve;
             this.sendMessage(message);
         });
-    }
-
-    /**
-     * send Reply Command
-     * @param {number} id - Request identifier
-     * @param {string} dst - Destination identifier
-     * @param {any} data - Data of the reply
-     */
-    protected sendReply(id: number, dst: string, data: any) {
-        const message = new Transport(UUID, dst, EnumTransport.REPLY, id, new TransportMessage(this.name, data));
-        message.setStatus("OK");
-        Log.debug(TAG + "sendReply : " + JSON.stringify(message));
-        this.sendMessage(message);
     }
 
     /**
