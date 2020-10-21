@@ -489,7 +489,7 @@ export class MediaChannel extends Channel {
             } catch (e) {
                 Log.error(TAG + "Implementation error on Notifier Method " + method + " : ", e);
                 Log.error(TAG + "Implementation error on Notifier Method " + method + " : ", e);
-                return EnumError.IMPLEMENTATION_ERROR;
+                return EnumError.NO_IMPLEMENTATION;
             }
         }
         return EnumError.OK;

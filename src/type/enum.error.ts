@@ -37,9 +37,9 @@ export enum EnumError {
     /** The mediaType is not known */
     UNKNOWN_MEDIA_TYPE = 2415,
     /** The tranferMode is not known */
-    UNKNOWN_TRANSFER_MODE = 2006,
+    UNKNOWN_TRANSFER_MODE = 2416,
+    /** The media is too short to buffer enough data according to the player state. */
+    MEDIA_NOT_READY = 2417,
     /** Internal Error, please send details on the tracker */
     UNKNOWN_ERROR = 2500,
-    /** In the namespace org.ocast.media, the command is not implemented by the application */
-    IMPLEMENTATION_ERROR = 2400,
 }
