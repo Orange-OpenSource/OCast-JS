@@ -61,7 +61,7 @@
     "typedoc": "^0.8.0",
     "typedoc-plugin-nojekyll": "^1.0.1",
     "typescript": "^2.4.2",
-    "ws": "^5.2.2"
+    "ws": "^7.4.5"
   },
   "nyc": {
     "include": [
