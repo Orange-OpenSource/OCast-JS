@@ -81,7 +81,7 @@ function getExpectedMetadata(name, mediaType, withTrack, code) {
         let track: any  = {
             type: "type_to_changed",
             trackId: "0",
-            enabled: true,
+            enable: true,
             language: "fr",
             label: "#1-fr"
         };
