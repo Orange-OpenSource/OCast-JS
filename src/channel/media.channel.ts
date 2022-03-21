@@ -230,16 +230,16 @@ export class MediaChannel extends Channel {
         params: [
             { name: "type", type: EnumTrack },
             { name: "trackId", type: String },
-            { name: "enabled", type: Boolean },
+            { name: "enable", type: Boolean },
             { name: "options", type: null },
         ],
     })
-    public doTrack(type: EnumTrack, trackId: string, enabled: boolean, options: any): EnumError | Promise<EnumError> {
+    public doTrack(type: EnumTrack, trackId: string, enable: boolean, options: any): EnumError | Promise<EnumError> {
         Log.debug(TAG + "onTrack");
         if (!this.media) {
             return EnumError.NO_PLAYER_INITIALIZED;
         }
-        let returnCode: EnumError = this.media.setTrack(type, trackId, enabled);
+        let returnCode: EnumError = this.media.setTrack(type, trackId, enable);
         return (returnCode !== EnumError.OK) ? returnCode : this.callNotifier("onTrack", arguments);
     }
 
