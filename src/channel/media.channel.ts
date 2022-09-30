@@ -74,7 +74,8 @@ export class MediaChannel extends Channel {
                     oldMedia.removeListeners();
                 }
                 this.medias[types[key]] = media;
-                // add listeners on new media element in order to have methods that depends on media status to work properly
+                // add listeners on new media element in order to have methods 
+                // that depends on media status to work properly
                 media.addListeners();
             }
         }
