@@ -146,13 +146,10 @@ export abstract class Media {
     return EnumError.NO_IMPLEMENTATION;
   }
 
-  protected abstract getMediaEvents();
-
   /**
    * Add Listeners
-   * @private
    */
-  protected addListeners(): void {
+  public addListeners(): void {
     const events: any = this.getMediaEvents();
     for (const event in events) {
       if (events.hasOwnProperty(event)) {
@@ -165,9 +162,8 @@ export abstract class Media {
 
   /**
    * Remove Listeners
-   * @private
    */
-  protected removeListeners(): void {
+  public removeListeners(): void {
     const events: any = this.getMediaEvents();
     for (const event in events) {
       if (events.hasOwnProperty(event)) {
@@ -175,6 +171,9 @@ export abstract class Media {
       }
     }
   }
+
+  protected abstract getMediaEvents();
+
   protected onUpdateMetadata(event): void {
     if (!this.mediaElement) {
       console.warn("MediaElement is null, ignore event ", event);
