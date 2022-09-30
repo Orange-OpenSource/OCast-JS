@@ -68,7 +68,14 @@ export class MediaChannel extends Channel {
         let media = new VideoMedia(mediaElement, this);
         for (const key in types) {
             if (types.hasOwnProperty(key)) {
+                let oldMedia: Media = this.medias[types[key]];
+                // remove listeners on old media element if any
+                if (oldMedia) {
+                    oldMedia.removeListeners();
+                }
                 this.medias[types[key]] = media;
+                // add listeners on new media element in order to have methods that depends on media status to work properly
+                media.addListeners();
             }
         }
     }
