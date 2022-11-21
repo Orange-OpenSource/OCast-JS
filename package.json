@@ -1,6 +1,6 @@
 {
   "name": "ocast-sdk",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "engines": {
     "node": ">=8.6.0"
   },
