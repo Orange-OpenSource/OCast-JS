@@ -74,7 +74,8 @@ export class MediaChannel extends Channel {
                     oldMedia.removeListeners();
                 }
                 this.medias[types[key]] = media;
-                // add listeners on new media element in order to have methods 
+                this.media = this.medias[types[key]];
+                // add listeners on new media element in order to have methods
                 // that depends on media status to work properly
                 media.addListeners();
             }
@@ -461,11 +462,13 @@ export class MediaChannel extends Channel {
      * Send a new playback status on MediaChannel
      */
     public sendPlaybackStatus() {
-        this.sendEvent({
-            name: MediaChannel.EVENTS.PLAYBACK_STATUS,
-            options: null,
-            params: this.media.getPlaybackStatus(),
-        });
+        if (this.media) {
+            this.sendEvent({
+                name: MediaChannel.EVENTS.PLAYBACK_STATUS,
+                options: null,
+                params: this.media.getPlaybackStatus(),
+            });
+        }
     }
 
     /**
@@ -473,11 +476,13 @@ export class MediaChannel extends Channel {
      */
     public sendMetadataChanged() {
         // To be called ....
-        this.sendEvent({
-            name: MediaChannel.EVENTS.METADATA_CHANGED,
-            options: null,
-            params: this.media.getMedatadata(),
-        });
+        if (this.media) {
+            this.sendEvent({
+                name: MediaChannel.EVENTS.METADATA_CHANGED,
+                options: null,
+                params: this.media.getMedatadata(),
+            });
+        }
     }
 
     public onUpdateStatus(status: PlaybackStatus) {
