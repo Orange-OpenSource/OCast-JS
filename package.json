@@ -54,7 +54,7 @@
     "rollup-plugin-typescript2": "^0.4.6",
     "rollup-plugin-uglify": "^2.0.1",
     "rollup-watch": "^4.0.0",
-    "semantic-release": "^15.0.3",
+    "semantic-release": "^15.13.16",
     "source-map-support": "^0.4.15",
     "ts-node": "^3.3.0",
     "tslint": "^4.5.1",
